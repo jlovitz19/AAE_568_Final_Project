@@ -24,7 +24,7 @@ x0 = [0;0;0;1; .01; -.01; .1];
 opts = odeset('RelTol',1e-6, 'AbsTol',1e-6);
 [~, y] = ode45(@(t,y) sim_KDE_DDE(y, diag(I)), tv, x0, opts);
 
-circ_orbit = sim_circular_orbit(h);
+circ_orbit = sim_circular_orbit_v1(h);
 
 
 figure

@@ -14,25 +14,25 @@ Outputs:
 function x_spherical = cart2spherical(x_cart)
 
 % Extract position and velocity from state vector
-r_vec = x_cart(1:3);
-v_vec = x_cart(4:6);
+r_vec = x_cart(1:3,:);
+v_vec = x_cart(4:6,:);
 
-x = r_vec(1); y = r_vec(2); z = r_vec(3);
-vx = v_vec(1); vy = v_vec(2); vz = v_vec(3);
+x = r_vec(1,:); y = r_vec(2,:); z = r_vec(3,:);
+vx = v_vec(1,:); vy = v_vec(2,:); vz = v_vec(3,:);
 
 % Compute spherical coordinates
-r     = norm(r_vec);                   % radial distance
+r     = vecnorm(r_vec,2);                   % radial distance
 theta = atan2(y, x);                   % azimuth (longitude-like)
-phi   = acos(z / r);                   % polar angle (from +z)
+phi   = acos(z ./ r);                   % polar angle (from +z)
 
 % Compute spherical velocity components
 % Radial component
-r_dot = dot(r_vec, v_vec) / r;
+r_dot = dot(r_vec, v_vec) ./ r;
 
 % Angular rates (from vector calculus in spherical coords)
-theta_dot = (x*vy - y*vx) / (x^2 + y^2);             % azimuthal rate
-phi_dot   = (r*vx*z - x*vz)*x + (r*vy*z - y*vz)*y;   % polar rate numerator
-phi_dot   = phi_dot / (r^2 * sqrt(x^2 + y^2));       % divide by denominator
+theta_dot = (x.*vy - y.*vx) ./ (x.^2 + y.^2);             % azimuthal rate
+phi_dot   = (r.*vx.*z - x.*vz).*x + (r.*vy.*z - y.*vz).*y;   % polar rate numerator
+phi_dot   = phi_dot ./ (r.^2 .* sqrt(x.^2 + y.^2));       % divide by denominator
 
 % Package output
 x_spherical = [r; theta; phi; r_dot; theta_dot; phi_dot];
