@@ -12,25 +12,32 @@ Outputs:
   velocity
 %}
 
-function x_cart = kep2cart(x_kep,m)
+function x_cart = kep2cart(x,m)
 
 % Process inputs
 if nargin < 2
    m = 0; % If no input given for m, assume zero
 end
 
+x_cart = NaN(6,length(x));
+
+for idx = 1:length(x)
+x_kep = x(:,idx);
+
 % Retrieve orbital elements
 a=x_kep(1); e=x_kep(2); i=x_kep(3);
-omeg=x_kep(4); wumbo=x_kep(5); Me=x_kep(6);
+omeg=x_kep(4); wumbo=x_kep(5); M=x_kep(6);
 
 % Constants
 G = 6.6743e-11; % Gravitational constant (m/s^)/(kg/m^2)
-M = 5.9722e24;  % Earth mass (kg)
+Me = 5.9722e24;  % Earth mass (kg)
 mu = G*(Me+m);   % Gravitational constant mu
 
 % Solve for true anomaly
 E = solve_kepler(M,e); % Eccentric anomaly
-nu = 2*atan2(sqrt((1+e)*tan(E/2)),sqrt(1-e));
+cos_nu = (cos(E) - e) / (1 - e*cos(E));
+sin_nu = (sqrt(1 - e^2) * sin(E)) / (1 - e*cos(E));
+nu = atan2(sin_nu, cos_nu);
 
 % Calculate semi-latus rectum
 p = a*(1-e^2);
@@ -62,6 +69,7 @@ Q = (R3_omeg * R1_i * R3_w)'; % total rotation
 r_eci = Q * r_perifocal;
 v_eci = Q * v_perifocal;
 
-x_cart = [r_eci; v_eci];
+x_cart(:,idx) = [r_eci; v_eci];
+end
 
 end
