@@ -13,7 +13,7 @@ l2 = .75;
 I = PMOI_rectangular_prism(m, [l1;l1;l2] / 1000);
 
 % define time
-tv = linspace(0, 2000, 1000);
+tv = linspace(0, 84000, 1000);
 
 % define IC (arbitrarily)
 % x is quaternions, wumbos
@@ -24,8 +24,8 @@ x0 = [0;0;0;1; .01; -.01; .1];
 opts = odeset('RelTol',1e-6, 'AbsTol',1e-6);
 [~, y] = ode45(@(t,y) sim_KDE_DDE(y, diag(I)), tv, x0, opts);
 
-circ_orbit = sim_circular_orbit_v1(h);
-
+[t,x] = sim_circular_orbit([6371+h;0;0;0;0;0],tv);
+circ_orbit = kep2cart(x);
 
 figure
 for idx = 1:4
@@ -51,9 +51,10 @@ end
 sgtitle('Angular Velocities', 'Interpreter', 'latex')
 
 figure
-plot(circ_orbit(1,:), circ_orbit(2,:))
+plot3(circ_orbit(1,:), circ_orbit(2,:), circ_orbit(3,:))
 xlabel('km', 'Interpreter', 'latex')
 ylabel('km', 'Interpreter', 'latex')
+zlabel('km', 'Interpreter', 'latex')
 grid
 title('Circular Orbit', 'Interpreter', 'latex')
 axis equal
