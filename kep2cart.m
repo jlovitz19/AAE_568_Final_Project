@@ -16,10 +16,10 @@ function x_cart = kep2cart(x,m)
 
 % Process inputs
 if nargin < 2
-   m = 0; % If no input given for m, assume zero
+   m = 61.6; % If no input given for m, assume zero
 end
 
-x_cart = NaN(6,length(x));
+x_cart = NaN(9,length(x));
 
 for idx = 1:length(x)
 x_kep = x(:,idx);
@@ -45,10 +45,12 @@ p = a*(1-e^2);
 % Calculate orbital radius from focus to body
 r = p/(1+e*cos(nu));
 
-% Step 4: Position and velocity in perifocal frame
+% Step 4: Position, velocity, acceleration in perifocal frame
 r_perifocal = [r * cos(nu); r * sin(nu); 0];
 
 v_perifocal = sqrt(mu / p) * [-sin(nu); e + cos(nu); 0];
+
+a_perifocal = -mu / r^3 * r_perifocal;
 
 % Step 5: Rotation matrices
 R3_omeg  = [cos(-omeg), -sin(-omeg), 0;
@@ -68,8 +70,9 @@ Q = (R3_omeg * R1_i * R3_w)'; % total rotation
 % Step 6: Rotate to ECI
 r_eci = Q * r_perifocal;
 v_eci = Q * v_perifocal;
+a_eci = Q * a_perifocal;
 
-x_cart(:,idx) = [r_eci; v_eci];
+x_cart(:,idx) = [r_eci; v_eci; a_eci];
 end
 
 end

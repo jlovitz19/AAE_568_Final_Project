@@ -2,7 +2,7 @@ function I = parallel_axis_thm(r_CG, m, I_C)
     % calculates I of a body using parallel axis theorem
     %
     % Parameters:
-    % r_CG: distance of body from center of gravity of system
+    % r_CG: distance of body from center of mass of system
     % m: mass of body
     % I_C: mass of individual body
     %

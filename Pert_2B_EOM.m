@@ -3,7 +3,7 @@ Perturbed two body dynamics via Gauss EoM's on classical orbital elements
 
 Inputs
 State "x" representing classical orbital elements:
-    a: semi-major axis (km)
+    a: semi-major axis (m)
     e: eccentricty
     i: inclination (rad)
     omeg: right ascension (rad)
@@ -27,10 +27,16 @@ function x_dot = Pert_2B_EOM(x,m,a_d)
 % Retrieve orbital elements
 a=x(1); e=x(2); i=x(3); omeg=x(4); wumbo=x(5); M=x(6);
 
-a = a*1000; % Convert km to m
+% Process inputs
+if nargin < 2
+   m = 61.6; % If no input given for m, assume 61.6
+end
+if nargin < 3
+   a = zeros(3,1); % If no input given for m, assume zero
+end
     
 % Constants
-G = 6.6743e-11; % Gravitational constant (m/s^)/(kg/m^2)
+G = 6.6743e-11; % Gravitational constant (km/s^)/(kg/m^2)
 Me = 5.9722e24;  % Earth mass (kg)
 
 % Mean motion

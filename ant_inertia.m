@@ -1,5 +1,8 @@
 %{
-Calculate the antenna-body frame moment of inertia tensor of the antenna
+Calculate the antenna-body frame moment of inertia tensor of the antenna.
+Optionally returns the center of mass of the antenna for use in the
+parallel axis theorem.
+
 Inputs:
     r_max: max antenna radius (m)
     d_max: max depth of the antenna from top to bottom (m)
