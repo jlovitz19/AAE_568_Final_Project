@@ -17,5 +17,5 @@ function I = parallel_axis_thm(r_CG, m, I_C)
         -x_G*y_G x_G^2+z_G^2 -y_G*z_G;...
         -x_G*z_G -y_G*z_G x_G^2+y_G^2];
 
-    I = I_C + m*mat_comp
+    I = I_C + m*mat_comp;
 end
