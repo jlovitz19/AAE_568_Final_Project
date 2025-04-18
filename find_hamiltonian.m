@@ -6,8 +6,16 @@ run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 syms rho theta phi drho dtheta dphi ddrho ddtheta ddphi omega_sat_1 omega_sat_2 omega_sat_3 omega_ant_1 omega_ant_2 omega_ant_3 
 syms q_sat_1 q_sat_2 q_sat_3 q_sat_4 q_ant_1 q_ant_2 q_ant_3 q_ant_4 e_theta e_phi theta_max phi_max error_weight real
 syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22
-syms mu_1 mu_2 mu_3 mu_4 u_1 u_2 u_3 u_4 u_5
-syms l m_sat m_ant r_cg_1 r_cg_2 r_cg_3 r_max d_max t_max m_ant
+syms mu_1 mu_2 mu_3 mu_4 u_1 u_2 u_3 u_4 u_5 v_rho v_phi v_theta
+assume(q_sat_1^2 + q_sat_2^2 + q_sat_3^2 + q_sat_4^2 == 1)
+assume(q_ant_1^2 + q_ant_2^2 + q_ant_3^2 + q_ant_4^2 == 1)
+
+l = .5;
+m_sat = 50;
+r_max = 0.25;
+d_max = 0.05;
+t_max = 0.01;
+m_ant = 11.6;
 
 % form state
 w_sat = [omega_sat_1, omega_sat_2, omega_sat_3].';
@@ -20,7 +28,7 @@ err = [e_phi, e_theta].';
 %% ORDER IS RHO, PHI, THETA %%
 
 % erm are dphi dro and dtheta supposed ?
-x = [rho; phi; theta; drho; rho*dphi; rho*dtheta*sin(phi); w_sat; w_ant; q_LOS2SAT; q_SAT2ANT; err]; 
+x = [rho; phi; theta; v_rho; v_phi; v_theta; w_sat; w_ant; q_LOS2SAT; q_SAT2ANT; err]; 
 
 % form control
 u = [u_1 u_2 u_3 u_4 u_5].';
@@ -112,9 +120,14 @@ dx = [
 
 % hamiltonian
 H = x.'*Q*x + u.'*R*u + lambda.'*dx + mu.'*c;
+%H = simplify(H, 'IgnoreAnalyticConstraints', true, 'Steps', 50);
+%disp(H)
+
+dH_du = jacobian(H, u); 
+sol = solve(dH_du.' == 0, u);
+%latex(sol.u_1)
 
 
-%diff(H, [u1, u2, u3, u4, u5])
 % pitch is theta, yaw is phi (this is needed for later, but cant use in
 % syms-land)
 %[e_theta, e_phi, ~] = dcm2angle(DCM_LOS2ANT, 'ZYX');
