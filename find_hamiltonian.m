@@ -36,7 +36,8 @@ DCM = quat2dcm(q_SAT2ANT); % right quaternion?
 I_total = I_sat + DCM*parallel_axis_thm([r_cg_1; r_cg_2; r_cg_3], m_ant, I_ant)*DCM.'; % <-- need parellel axis theorem
 
 % form R
-R = diag([I_total, I_total, I_total, I_ant, I_ant, I_ant]);
+%R = diag([I_total, I_total, I_total, I_ant, I_ant, I_ant]);
+R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_ant)]);
 
 % form constraints
 c = [theta_max; -theta_max; phi_max; -phi_max];
@@ -46,4 +47,5 @@ lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_
 mu = [mu_1 mu_2 mu_3 mu_4 mu_5].';
 
 % dynamics !
+
 
