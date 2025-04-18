@@ -5,8 +5,8 @@ run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 
 syms rho theta phi drho dtheta dphi ddrho ddtheta ddphi omega_sat_1 omega_sat_2 omega_sat_3 omega_ant_1 omega_ant_2 omega_ant_3 
 syms q_sat_1 q_sat_2 q_sat_3 q_sat_4 q_ant_1 q_ant_2 q_ant_3 q_ant_4 e_theta e_phi theta_max phi_max error_weight real
-syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16
-syms mu_1 mu_2 mu_3 mu_4 mu_5 u_1 u_2 u_3 u_4 u_5
+syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22
+syms mu_1 mu_2 mu_3 mu_4 u_1 u_2 u_3 u_4 u_5
 syms I_ant_11 I_ant_12 I_ant_13 I_ant_21 I_ant_22 I_ant_23 I_ant_31 I_ant_32 I_ant_33
 %syms I_sat_11 I_sat_12 I_sat_13 I_sat_21 I_sat_22 I_sat_23 I_sat_31 I_sat_32 I_sat_33
 syms l m_sat m_ant r_cg_1 r_cg_2 r_cg_3 t
@@ -46,8 +46,8 @@ R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_
 c = [theta_max; -theta_max; phi_max; -phi_max];
 
 % form costate
-lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16].';
-mu = [mu_1 mu_2 mu_3 mu_4 mu_5].';
+lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22].';
+mu = [mu_1 mu_2 mu_3 mu_4].';
 
 %% dynamics !
 
@@ -108,6 +108,10 @@ dx = [
   e_theta
 ];
 
+
+% hamiltonian
+H = x.'*Q*x + u.'*R*u + lambda.'*dx + mu.'*c;
+latex(simplify(H))
 
 
 
