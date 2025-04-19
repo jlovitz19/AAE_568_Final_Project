@@ -49,7 +49,9 @@ I_total = I_sat + DCM*parallel_axis_thm(r_cg, m_ant, I_ant)*DCM.'; % <-- need pa
 
 % form R
 %R = diag([I_total, I_total, I_total, I_ant, I_ant, I_ant]);
-R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_ant)]);
+%R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_ant)]);
+R_ = diag([I_total(1,1), I_total(2,2), I_total(3,3)]);
+R = blkdiag(R_, I_ant(1:2, 1:2)); % davis correct me if im wrong but I(3,3) would be roll?
 
 % form costate
 lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22].';
