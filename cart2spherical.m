@@ -1,17 +1,21 @@
 %{
 Convert cartesian position and velocity vectors into spherical coordinates
 Inputs:
-  x_cart        - State vector in cartesian frame (6x1) [m; m/s, m/s^2]
+  x_cart    - State vector in cartesian frame (6x1) [m; m/s, m/s^2]
 Outputs:
-  x_spherical   - [r; theta; phi; r_dot; theta_dot; phi_dot]
-                  r         - radial distance [m]
-                  theta     - azimuth (longitude in xy-plane) [rad]
-                  phi       - polar angle (from +z) [rad]
-                  r_dot     - radial velocity [m/s]
-                  theta_dot - azimuthal rate [rad/s]
-                  phi_dot   - polar angle rate [rad/s]
+  x_sphere  - [r; theta; phi; dr; dtheta; dphi; ddr; ddtheta; ddphi]
+  r         - radial distance [m]
+  theta     - azimuth (longitude in xy-plane) [rad]
+  phi       - polar angle (from +z) [rad]
+  dr        - radial velocity [m/s]
+  dtheta    - azimuthal rate [rad/s]
+  dphi      - polar angle rate [rad/s]
+  ddr       - radial acceleration [m/s^2]
+  ddtheta   - azimuthal acceleration [rad/s^2]
+  ddphi     - polar angle acceleration [rad/s^2]
+
 %}
-function x_spherical = cart2spherical(x_cart)
+function x_sphere = cart2spherical(x_cart)
 
 % Extract components
 p_vec = x_cart(1:3,:);   % position [x; y; z]
@@ -61,6 +65,6 @@ ddphi = -(ddz ./ (x.^2 + y.^2 + z.^2).^(1/2) ...
         (x.^2 + y.^2 + z.^2).^2)) ...
         ./ (2 .* (1 - z.^2 ./ (x.^2 + y.^2 + z.^2)).^(3/2));
 
-x_spherical = [r;theta;phi;dr;dtheta;dphi;ddr;ddtheta;ddphi];
+x_sphere = [r;theta;phi;dr;dtheta;dphi;ddr;ddtheta;ddphi];
 
 end
