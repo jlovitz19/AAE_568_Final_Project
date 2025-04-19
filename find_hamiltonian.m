@@ -6,7 +6,7 @@ run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 syms rho theta phi drho dtheta dphi ddrho ddtheta ddphi omega_sat_1 omega_sat_2 omega_sat_3 omega_ant_1 omega_ant_2 omega_ant_3 
 syms q_sat_1 q_sat_2 q_sat_3 q_sat_4 q_ant_1 q_ant_2 q_ant_3 q_ant_4 e_theta e_phi error_weight real
 syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22
-syms mu_1 mu_2 mu_3 mu_4 u_1 u_2 u_3 u_4 u_5 
+syms mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10 mu_11 mu_12 mu_13 mu_14 u_1 u_2 u_3 u_4 u_5 
 assume(q_sat_1^2 + q_sat_2^2 + q_sat_3^2 + q_sat_4^2 == 1)
 assume(q_ant_1^2 + q_ant_2^2 + q_ant_3^2 + q_ant_4^2 == 1)
 
@@ -53,7 +53,7 @@ R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_
 
 % form costate
 lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22].';
-mu = [mu_1 mu_2 mu_3 mu_4].';
+mu = [mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10 mu_11 mu_12 mu_13 mu_14].';
 
 %% dynamics !
 
@@ -109,12 +109,19 @@ phi_ant = acos(DCM_SAT2ANT(1,1));
 theta_ant = acos(DCM_SAT2ANT(3,3));
 
 max_angle = deg2rad(15); % <-- random
-c = [phi_ant - max_angle; -phi_ant - max_angle; theta_ant - max_angle; -theta_ant - max_angle];
+c_ant_angle = [phi_ant - max_angle; -phi_ant - max_angle; theta_ant - max_angle; -theta_ant - max_angle];
 
+u_ant_max = 0.5; % Nm... arbitrary.. roughly 0.1-2 Nm range
+u_sat_max = 0.5; % Nm... arbitrary (and different from ant_max) roughly 0.05-0.5 Nm
+c_max_torque = [
+    u_1 - u_sat_max; -u_1 - u_sat_max;
+    u_2 - u_sat_max; -u_2 - u_sat_max;
+    u_3 - u_sat_max; -u_3 - u_sat_max;
+    u_4 - u_ant_max; -u_4 - u_ant_max
+    u_5 - u_ant_max; -u_5 - u_ant_max
+    ];
+c = [c_ant_angle; c_max_torque];
 % finally form the state vector 
-
-%% I MESSED UP AND NEED ERROR RATES STILL
-
 dx = [
   v;
   a;
@@ -134,12 +141,26 @@ H = x.'*Q*x + u.'*R*u + lambda.'*dx + mu.'*c;
 %H = simplify(H, 'IgnoreAnalyticConstraints', true, 'Steps', 50);
 %disp(H)
 
-dH_du = jacobian(H, u); 
+dH_du = jacobian(H, u);
+%dH_du = simplify(dH_du, 'IgnoreAnalyticConstraints', true, 'Steps', 50);
 sol = solve(dH_du.' == 0, u);
-%latex(sol.u_1)
+%sol = struct2array(sol);
+%sol = simplify(sol, 'IgnoreAnalyticConstraints', true, 'Steps', 50);
 
+
+%latex(sol.u_1)
+%{
 u_max = 1*ones(5,1); % <--- im assuming just |u_j| <= 1... can research
 u_star = simplify(-sign(dH_du).' .* u_max);
+%}
+%{
+u_bangbang = matlabFunction(u_star, 'Vars', {rho theta phi ...
+drho dtheta dphi ddrho ddtheta ddphi omega_sat_1 omega_sat_2 omega_sat_3 ...
+omega_ant_1 omega_ant_2 omega_ant_3 q_sat_1 q_sat_2 q_sat_3 q_sat_4  ... 
+q_ant_1 q_ant_2 q_ant_3 q_ant_4 e_theta e_phi error_weight
+});
+%}
+%u_bangbang = matlabFunction(u_star);
 
 
 %{
