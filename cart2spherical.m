@@ -13,39 +13,54 @@ Outputs:
 %}
 function x_spherical = cart2spherical(x_cart)
 
-% Extract position and velocity from state vector
-r_vec = x_cart(1:3,:);
-v_vec = x_cart(4:6,:);
-a_vec = x_cart(7:9,:);
+% Extract components
+p_vec = x_cart(1:3,:);   % position [x; y; z]
+v_vec = x_cart(4:6,:);   % velocity [vx; vy; vz]
+a_vec = x_cart(7:9,:);   % acceleration [ax; ay; az]
 
-x = r_vec(1,:); y = r_vec(2,:); z = r_vec(3,:); % position
-dx = v_vec(1,:); dy = v_vec(2,:); dz = v_vec(3,:); % velocity
-ddx = a_vec(1); ddy = a_vec(2); ddz = a_vec(3); % acceleration
+% Individual components
+x  = p_vec(1,:);  y  = p_vec(2,:);  z  = p_vec(3,:);
+dx = v_vec(1,:);  dy = v_vec(2,:);  dz = v_vec(3,:);
+ddx = a_vec(1,:);  ddy = a_vec(2,:);  ddz = a_vec(3,:);
 
-% Compute spherical coordinates
-r     = vecnorm(r_vec,2);                   % radial distance
-theta = atan2(y, x);                   % azimuth (longitude-like)
-phi   = acos(z ./ r);                   % polar angle (from +z)
+% Radial distance and its derivatives
+r     = vecnorm(p_vec);
+dr = (2.*dx.*x + 2.*dy.*y + 2.*dz.*z)./(2.*(x.^2 + y.^2 + z.^2).^(1/2));
+ddr = (2.*dx.^2 + 2.*dy.^2 + 2.*dz.^2 +...
+    2.*x.*ddx + 2.*y.*ddy + 2.*z.*ddz) ./...
+    (2.*(x.^2 + y.^2 + z.^2).^(1/2)) -...
+    (2.*x.*dx + 2.*y.*dy + 2.*z.*dz).^2 ./...
+    (4.*(x.^2 + y.^2 + z.^2).^(3/2));
 
-% Compute spherical velocity components
-% Radial component
-r_dot = dot(r_vec, v_vec) ./ r;
+% Azimuth angle and its derivatives
+theta = sign(y).*acos(x./sqrt(x.^2+y.^2));
+dtheta = (dy./x - (y.*dx)./x.^2) ./ (y.^2./x.^2 + 1);
+ddtheta = (ddy./x - (2.*dx.*dy)./x.^2 + (2.*y.*dx.^2)./x.^3 -...
+    (y.*ddx)./x.^2) ./ (y.^2./x.^2 + 1) - ((dy./x - (y.*dx)./x.^2) .*...
+    ((2.*y.*dy)./x.^2 - (2.*y.^2.*dx)./x.^3)) ./ (y.^2./x.^2 + 1).^2;
 
-% Angular rates (from vector calculus in spherical coords)
-theta_dot = (x.*dy - y.*dx) ./ (x.^2 + y.^2);
-phi_dot   = x.*z.*dx + x.^2.*-dz + y.*(z.*dy - y.*dz);
-phi_dot   = phi_dot ./ (sqrt(x.^2+y.^2) .* (x.^2+y.^2+z.^2));
+% Polar angle and its derivatives
+phi   = acos(z ./ r);
+dphi = -(dz ./ (x.^2 + y.^2 + z.^2).^(1/2) -...
+    (z .* (2.*x.*dx + 2.*y.*dy + 2.*z.*dz)) ./...
+    (2 .* (x.^2 + y.^2 + z.^2).^(3/2))) ./...
+    (1 - z.^2 ./ (x.^2 + y.^2 + z.^2)).^(1/2);
+ddphi = -(ddz ./ (x.^2 + y.^2 + z.^2).^(1/2) ...
+        - (dz .* (2.*x.*dx + 2.*y.*dy + 2.*z.*dz)) ./...
+        (x.^2 + y.^2 + z.^2).^(3/2) - (z .* (2.*dx.^2 + 2.*dy.^2 +...
+        2.*dz.^2 + 2.*x.*ddx + 2.*y.*ddy + 2.*z.*ddz)) ./...
+        (2 .* (x.^2 + y.^2 + z.^2).^(3/2)) + (3 .* z .*...
+        (2.*x.*dx + 2.*y.*dy + 2.*z.*dz).^2) ./...
+        (4 .* (x.^2 + y.^2 + z.^2).^(5/2))) ...
+        ./ (1 - z.^2 ./ (x.^2 + y.^2 + z.^2)).^(1/2) ...
+        - ((dz ./ (x.^2 + y.^2 + z.^2).^(1/2) ...
+        - (z .* (2.*x.*dx + 2.*y.*dy + 2.*z.*dz)) ./...
+        (2 .* (x.^2 + y.^2 + z.^2).^(3/2))) ...
+        .* ((2 .* z .* dz) ./ (x.^2 + y.^2 + z.^2) ...
+        - (z.^2 .* (2.*x.*dx + 2.*y.*dy + 2.*z.*dz)) ./...
+        (x.^2 + y.^2 + z.^2).^2)) ...
+        ./ (2 .* (1 - z.^2 ./ (x.^2 + y.^2 + z.^2)).^(3/2));
 
-% --- Second derivatives (acceleration) ---
-r_ddot = (x.*ddx + y.*ddy + z.*ddz + dx.^2 + dy.^2 + dz.^2 - r_dot.^2) ./ r;
-
-theta_ddot = (x.*ddy - y.*ddx - 2.*theta_dot.*r_dot.*(x.^2 + y.^2)) ./ (x.^2 + y.^2);
-
-phi_ddot = ( (ddz.*r - z.*r_ddot - 2.*r_dot.*phi_dot.*r - z.*(theta_dot.^2)) ...
-           - r.^2.*sin(phi).*phi_dot.^2 ) ./ (r.^2 .* cos(phi));
-
-% Package output
-x_spherical = [r; theta; phi; r_dot; theta_dot; phi_dot;...
-    r_ddot; theta_ddot; phi_ddot];
+x_spherical = [r;theta;phi;dr;dtheta;dphi;ddr;ddtheta;ddphi];
 
 end
