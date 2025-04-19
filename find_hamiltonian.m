@@ -51,10 +51,6 @@ I_total = I_sat + DCM*parallel_axis_thm(r_cg, m_ant, I_ant)*DCM.'; % <-- need pa
 %R = diag([I_total, I_total, I_total, I_ant, I_ant, I_ant]);
 R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_ant)]);
 
-% form constraints
-max_angle = deg2rad(15); % <-- random
-c = [x(2) - max_angle; -x(2) - max_angle; x(3) - max_angle; -x(3) - max_angle];
-
 % form costate
 lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22].';
 mu = [mu_1 mu_2 mu_3 mu_4].';
@@ -95,7 +91,7 @@ DCM_LOS2SAT = quat2dcm(q_LOS2SAT);
 DCM_SAT2ANT = quat2dcm(q_SAT2ANT);
 DCM_LOS2ANT = simplify(DCM_LOS2SAT*DCM_SAT2ANT);
 
-% get w_LOS2ANT
+% get w_LOS2ANT in antenna frame
 omega_LOS2ANT = DCM_SAT2ANT*w_sat + w_ant;
 
 
@@ -103,11 +99,17 @@ omega_LOS2ANT = DCM_SAT2ANT*w_sat + w_ant;
 % let 1 be pitch=theta and 3=yaw=phi --> use 31 E-A
 % DCM_31 = R3(e_phi) * R1(e_theta); % <-- jut for seeing relationships
 e_phi_expr = acos(DCM_LOS2ANT(1,1));
-e_theta_expr = acos(DCM_LOS2ANT(3,3));
+e_theta_expr = acos(DCM_LOS2ANT(3,3)); % <-- this stuff feels suspect 2 me!
 
 d_e_phi = -omega_LOS2ANT(1);  % For roll (phi)
 d_e_theta = -omega_LOS2ANT(3);  % For pitch (theta)
 
+% form constraints
+phi_ant = acos(DCM_SAT2ANT(1,1));
+theta_ant = acos(DCM_SAT2ANT(3,3));
+
+max_angle = deg2rad(15); % <-- random
+c = [phi_ant - max_angle; -phi_ant - max_angle; theta_ant - max_angle; -theta_ant - max_angle];
 
 % finally form the state vector 
 
