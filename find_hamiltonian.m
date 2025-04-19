@@ -6,7 +6,7 @@ run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 syms rho theta phi drho dtheta dphi ddrho ddtheta ddphi omega_sat_1 omega_sat_2 omega_sat_3 omega_ant_1 omega_ant_2 omega_ant_3 
 syms q_sat_1 q_sat_2 q_sat_3 q_sat_4 q_ant_1 q_ant_2 q_ant_3 q_ant_4 e_theta e_phi theta_max phi_max error_weight real
 syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22
-syms mu_1 mu_2 mu_3 mu_4 u_1 u_2 u_3 u_4 u_5 v_rho v_phi v_theta
+syms mu_1 mu_2 mu_3 mu_4 u_1 u_2 u_3 u_4 u_5 
 assume(q_sat_1^2 + q_sat_2^2 + q_sat_3^2 + q_sat_4^2 == 1)
 assume(q_ant_1^2 + q_ant_2^2 + q_ant_3^2 + q_ant_4^2 == 1)
 
@@ -28,7 +28,7 @@ err = [e_phi, e_theta].';
 %% ORDER IS RHO, PHI, THETA %%
 
 % erm are dphi dro and dtheta supposed ?
-x = [rho; phi; theta; v_rho; v_phi; v_theta; w_sat; w_ant; q_LOS2SAT; q_SAT2ANT; err]; 
+x = [rho; phi; theta; drho; dphi; dtheta; w_sat; w_ant; q_LOS2SAT; q_SAT2ANT; err]; 
 
 % form control
 u = [u_1 u_2 u_3 u_4 u_5].';
@@ -92,7 +92,7 @@ dq_SAT2ANT = quat_kde(q_SAT2ANT, w_ant);
 % get DCM LOS2ANT 
 DCM_LOS2SAT = quat2dcm(q_LOS2SAT);
 DCM_SAT2ANT = quat2dcm(q_SAT2ANT);
-DCM_LOS2ANT = DCM_LOS2SAT*DCM_SAT2ANT;
+DCM_LOS2ANT = simplify(DCM_LOS2SAT*DCM_SAT2ANT);
 
 % get w_LOS2ANT
 omega_LOS2ANT = DCM_SAT2ANT*w_sat + w_ant;
@@ -101,11 +101,17 @@ omega_LOS2ANT = DCM_SAT2ANT*w_sat + w_ant;
 % from my diagram, 2 is roll. 1 and 3 are pitch or yaw, u choose chande
 % let 1 be pitch=theta and 3=yaw=phi --> use 31 E-A
 % DCM_31 = R3(e_phi) * R1(e_theta); % <-- jut for seeing relationships
-e_phi = acos(DCM_LOS2ANT(1,1));
-e_theta = acos(DCM_LOS2ANT(3,3));
+e_phi_expr = acos(DCM_LOS2ANT(1,1));
+e_theta_expr = acos(DCM_LOS2ANT(3,3));
+
+d_e_phi = -omega_LOS2ANT(1);  % For roll (phi)
+d_e_theta = -omega_LOS2ANT(3);  % For pitch (theta)
 
 
-% finally form the state vector
+% finally form the state vector 
+
+%% I MESSED UP AND NEED ERROR RATES STILL
+
 dx = [
   v;
   a;
@@ -113,9 +119,11 @@ dx = [
   dw_ant;
   dq_LOS2SAT;
   dq_SAT2ANT;
-  e_phi;
-  e_theta
+  d_e_phi;
+  d_e_theta
 ];
+
+dx = simplify(dx);
 
 
 % hamiltonian
@@ -127,8 +135,14 @@ dH_du = jacobian(H, u);
 sol = solve(dH_du.' == 0, u);
 %latex(sol.u_1)
 
+u_max = 1*ones(5,1); % <--- im assuming just |u_j| <= 1... can research
+u_star = simplify(-sign(dH_du).' .* u_max);
 
-% pitch is theta, yaw is phi (this is needed for later, but cant use in
-% syms-land)
-%[e_theta, e_phi, ~] = dcm2angle(DCM_LOS2ANT, 'ZYX');
 
+%{
+
+u_func = matlabFunction(u_star, 'Vars', {x1, x2, x3, x4, x5, ...
+                                         lambda1, lambda2, lambda3,
+                                         lambda4, lambda5});
+
+%}
