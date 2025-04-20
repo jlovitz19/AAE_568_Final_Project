@@ -150,6 +150,8 @@ sol = solve(dH_du.' == 0, u);
 %sol = simplify(sol, 'IgnoreAnalyticConstraints', true, 'Steps', 50);
 
 
+
+
 %latex(sol.u_1)
 %{
 u_max = 1*ones(5,1); % <--- im assuming just |u_j| <= 1... can research
