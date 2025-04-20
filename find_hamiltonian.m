@@ -153,6 +153,7 @@ u_1_func = matlabFunction(sol.u_1, 'File', 'get_u1.m');
 u_2_func = matlabFunction(sol.u_2, 'File', 'get_u2.m');
 u_3_func = matlabFunction(sol.u_3, 'File', 'get_u3.m');
 u_4_func = matlabFunction(sol.u_4, 'File', 'get_u4.m');
+u_5_func = matlabFunction(sol.u_5, 'File', 'get_u5.m');
 
 %latex(sol.u_1)
 %{
