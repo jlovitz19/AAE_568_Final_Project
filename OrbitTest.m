@@ -6,7 +6,8 @@ R = 6.37836e6;
 a = 460e3+R; % semi major axis (m)
 T = 2*pi*sqrt(a^3/(G*Me)); % orbital period (s)
 
-[t,x] = sim_circular_orbit([a;0.00054;deg2rad(51.6360);deg2rad(15.8423);deg2rad(55.3016);deg2rad(304.8477)],0:0.1:T,61.6);
+[t,x] = sim_circular_orbit([a;0.00054;deg2rad(51.6360);deg2rad(15.8423);...
+    deg2rad(55.3016);deg2rad(304.8477)],0:0.1:T,61.6);
 x_cart = kep2cart(x,61.6);
 x_sphere = cart2spherical(x_cart);
 
