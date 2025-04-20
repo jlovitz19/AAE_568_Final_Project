@@ -12,8 +12,8 @@ phi(t) = acos(z/(sqrt(x(t)^2+y(t)^2+z(t)^2)));
 dr = diff(r(t),t);
 ddr = diff(diff(r(t),t),t);
 
-dth = diff(th(t),t);
-ddth = diff(diff(th(t),t),t);
-
 dphi = diff(phi(t),t);
 ddphi = diff(diff(phi(t),t),t);
+
+dth = diff(th(t),t);
+ddth = diff(diff(th(t),t),t);
