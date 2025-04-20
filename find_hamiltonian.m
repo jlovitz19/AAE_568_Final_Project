@@ -334,13 +334,56 @@ function y_dot = bvp_ode(y)
     C = [u1-gamma_3; -u1-gamma_3; u2-gamma_3; -u2-gamma_3;...
         u3-gamma_3; -u3-gamma_3; u4-gamma_4; -u4-gamma_4;...
         u5-gamma_4; -u5-gamma_4];
-    
+
+    %{
+    u1 = get_u1(lambda_7, mu_1, mu_2, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
+    u2 = get_u2(lambda_8, mu_3, mu_4, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
+    u3 = get_u3(lambda_9, mu_5, mu_6, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
+    u4 = get_u4(lambda_11, mu_7, mu_8);
+    u5 = get_u5(lambda_12, mu_9, mu_10);
+    %}
+    mu = zeros(10, 1);
 
     if C(1) >= 0
-        mu2 = 0;
-        mu3 = 0;
-        mu4 = 0;
+        u1 = gamma_3;
+        % back calculate for mu
+    elseif C(2) >= 0
+        u1 = -gamma_3;
+        % back calc
+    elseif C(3) >= 0
+        % mu(3) will be found in a sec
+        u2 = gamma_3;
+        % back calculate for mu
+    elseif C(4) >= 0
+        % mu(4) will be found in a sec
+        u2 = -gamma_3;
+        % back calculate for mu
+    elseif C(5) >= 0
+        % mu(5) will be found in a sec
+        u3 = gamma_3;
+        % back calculate for mu
+    elseif C(6) >= 0
+        % mu(6) will be found in a sec
+        u3 = -gamma_3;
+        % back calculate for mu
+    elseif C(7) >= 0
+        % mu(7) will be found in a sec
+        u4 = gamma_4;
+        % back calculate for mu
+    elseif C(8) >= 0
+        % mu(8) will be found in a sec
+        u4 = -gamma_4;
+        % back calculate for mu
+    elseif C(9) >= 0
+        % mu(9) will be found in a sec
+        u5 = gamma_4;
+        % back calculate for mu
+    elseif C(10) >= 0
+        % mu(10) will be found in a sec
+        u5 = -gamma_4;
+        % back calculate for mu
     end
+
     %}
  
  
@@ -351,6 +394,8 @@ function y_dot = bvp_ode(y)
     % construct x_dot
     x_dot = [v; a; dw_sat; dw_ant; dq_los2sat;...
         dq_sat2ant; e_phi_dot; e_theta_dot; x_dot_np1];
+
+
 
  
 
