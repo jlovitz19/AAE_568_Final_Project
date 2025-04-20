@@ -5,8 +5,9 @@ run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 
 syms rho theta phi drho dtheta dphi ddrho ddtheta ddphi omega_sat_1 omega_sat_2 omega_sat_3 omega_ant_1 omega_ant_2 omega_ant_3 
 syms q_sat_1 q_sat_2 q_sat_3 q_sat_4 q_ant_1 q_ant_2 q_ant_3 q_ant_4 e_theta e_phi real
-syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22
-syms mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10 mu_11 mu_12 mu_13 mu_14 u_1 u_2 u_3 u_4 u_5 
+syms lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22 lambda_23 lambda_24 lambda_25 lambda_26
+syms mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10 u_1 u_2 u_3 u_4 u_5 
+syms x_np1_1 x_np1_2 x_np1_3 x_np1_4
 assume(q_sat_1^2 + q_sat_2^2 + q_sat_3^2 + q_sat_4^2 == 1)
 assume(q_ant_1^2 + q_ant_2^2 + q_ant_3^2 + q_ant_4^2 == 1)
 
@@ -32,7 +33,8 @@ err = [e_phi, e_theta].';
 %% ORDER IS RHO, PHI, THETA %%
 
 % erm are dphi dro and dtheta supposed ?
-x = [rho; phi; theta; drho; dphi; dtheta; w_sat; w_ant; q_LOS2SAT; q_SAT2ANT; err]; 
+x_np1 = [x_np1_1; x_np1_2; x_np1_3; x_np1_4];
+x = [rho; phi; theta; drho; dphi; dtheta; w_sat; w_ant; q_LOS2SAT; q_SAT2ANT; err; x_np1]; 
 
 % form control
 u = [u_1 u_2 u_3 u_4 u_5].';
@@ -51,6 +53,10 @@ DCM = quat2dcm(q_SAT2ANT); % right quaternion?
 r_cg = r_cg_ant  + ones(3,1) * l / 2;
 I_total = I_sat + DCM*parallel_axis_thm(r_cg, m_ant, I_ant)*DCM.'; % <-- need parellel axis theorem
 
+%{
+I_tot = matlabFunction([I_total(1, 1); I_total(2, 2); I_total(3, 3)], 'File', 'get_totalInertia.m');
+I_a = matlabFunction([I_ant(1, 1); I_ant(2, 2); I_ant(3, 3)], 'File', 'get_antennaInertia.m');
+%}
 % form R
 %R = diag([I_total, I_total, I_total, I_ant, I_ant, I_ant]);
 %R = diag([trace(I_total), trace(I_total), trace(I_total), trace(I_ant), trace(I_ant)]);
@@ -58,7 +64,7 @@ R_ = diag([I_total(1,1), I_total(2,2), I_total(3,3)]);
 R = blkdiag(R_, I_ant(1:2, 1:2)); % davis correct me if im wrong but I(3,3) would be roll?
 
 % form costate
-lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22].';
+lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22 lambda_23 lambda_24 lambda_25 lambda_26].';
 mu = [mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10].';
 
 %% dynamics !
@@ -134,7 +140,8 @@ dx = [
   dq_LOS2SAT;
   dq_SAT2ANT;
   d_e_phi;
-  d_e_theta
+  d_e_theta;
+  c_ant_angle
 ];
 
 dx = simplify(dx);
@@ -187,9 +194,10 @@ u_func = matlabFunction(u_star, 'Vars', {x1, x2, x3, x4, x5, ...
 
 %}
 
-% lamba dot = 2H/2x
+% lambda dot = 2H/2x
 del_H_del_x = jacobian(H, x);
-lamba_dot = -del_H_del_x;
+get_del_h_del_x = matlabFunction(del_H_del_x, 'File', 'get_2H2x');
+lambda_dot = -del_H_del_x;
 
 % 2H/2u = 0
 del_H_del_u = jacobian(H, u) == zeros(1, 5);
@@ -213,19 +221,20 @@ u_func = matlabFunction(u_star, 'Vars', {x1, x2, x3, x4, x5, ...
                                          lambda4, lambda5});
 
 %}
-function y_dot = bvp_ode(y)
-    % antenna limits
+function y_dot = bvp_ode(y, p)
+    % antenna limits (can be changed)
     gamma_1 = 15*pi/180;
     gamma_2 = 15*pi/180;
     gamma_3 = 0.5;
     gamma_4 = 0.5;
 
+    % states
     rho = y(1);
-    psi = y(2);
+    phi = y(2);
     theta = y(3);
 
     rho_dot = y(4);
-    psi_dot = y(5);
+    phi_dot = y(5);
     th_dot = y(6);
 
     w_sat = y(7:9);
@@ -244,36 +253,39 @@ function y_dot = bvp_ode(y)
     q_ant_3 = q_sat2ant(3);
     q_ant_4 = q_sat2ant(4);
 
-    e_psi = y(21);
+    e_phi = y(21);
     e_theta = y(22);
 
-    lambda_1 = y(23);
-    lambda_2 = y(24);
-    lambda_3 = y(25);
-    lambda_4 = y(26);
-    lambda_5 = y(27);
-    lambda_6 = y(28);
-    lambda_7 = y(29);
-    lambda_8 = y(30);
-    lambda_9 = y(31);
-    lambda_10 = y(32);
-    lambda_11 = y(33);
-    lambda_12 = y(34);
-    lambda_13 = y(35);
-    lambda_14 = y(36);
-    lambda_15 = y(37);
-    lambda_16 = y(38);
-    lambda_17 = y(39);
-    lambda_18 = y(40);
-    lambda_19 = y(41);
-    lambda_20 = y(42);
-    lambda_21 = y(43);
-    lambda_22 = y(44);
+    % costates
+    lambda_1 = y(27);
+    lambda_2 = y(28);
+    lambda_3 = y(29);
+    lambda_4 = y(30);
+    lambda_5 = y(31);
+    lambda_6 = y(32);
+    lambda_7 = y(33);
+    lambda_8 = y(34);
+    lambda_9 = y(35);
+    lambda_10 = y(36);
+    lambda_11 = y(37);
+    lambda_12 = y(38);
+    lambda_13 = y(39);
+    lambda_14 = y(40);
+    lambda_15 = y(41);
+    lambda_16 = y(42);
+    lambda_17 = y(43);
+    lambda_18 = y(44);
+    lambda_19 = y(45);
+    lambda_20 = y(46);
+    lambda_21 = y(47);
+    lambda_22 = y(48);
 
-    % state constraint states
-    x_np1 = y(45:48);
-    lamba_np1 = y(49:52);
-
+    % state constraint states and costates
+    x_np1 = y(23:26);
+    lambda_23 = y(49);
+    lambda_24 = y(50);
+    lambda_25 = y(51);
+    lambda_26 = y(52);
 
     % unconstrained inputs
     u1 = get_u1(lambda_7, 0, 0, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
@@ -282,22 +294,18 @@ function y_dot = bvp_ode(y)
     u4 = get_u4(lambda_11, 0, 0);
     u5 = get_u5(lambda_12, 0, 0);
 
-    %{
-    u1 = get_u1(lambda_7, mu_5, mu_6, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
-    u2 = get_u2(lambda_8, mu_7, mu_8, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
-    u3 = get_u3(lambda_9, mu_9, mu_10, q_ant_1, q_ant_2, q_ant_3, q_ant_4);
-    u4 = get_u4(lambda_11, mu_11, mu_12);
-    u5 = get_u5(lambda_12, mu_13, mu_14);
-    %}
+    % get inertia
+    I_total = p.I_total;
+    I_ant = p.I_ant;
 
     % cunstruct x_dot
 
     % get vel and acc
-    v = [rho_dot; rho*psi_dot; rho*th_d*sin(psi)];
+    v = [rho_dot; rho*phi_dot; rho*th_d*sin(phi)];
     a = [
-        (rho_ddot - rho*psi_d^2 - rho*th_d^2*sin(psi)^2);
-        rho*psi_ddot + 2*rho_dot*psi_dot - rho*th_dot^2*sin(psi)*cos(psi);
-        rho*th_ddot*sin(psi) + 2*rho_dot*th_dot*sin(psi) + 2*rho*psi_dot*th_dot*cos(psi)
+        (rho_ddot - rho*phi_d^2 - rho*th_d^2*sin(phi)^2);
+        rho*phi_ddot + 2*rho_dot*phi_dot - rho*th_dot^2*sin(phi)*cos(phi);
+        rho*th_ddot*sin(phi) + 2*rho_dot*th_dot*sin(phi) + 2*rho*phi_dot*th_dot*cos(phi)
     ];
 
     % get wumbo rate of satellite body wrt inertial (note order of u_s to axis # !)
@@ -324,16 +332,13 @@ function y_dot = bvp_ode(y)
     % get DCM LOS2ANT 
     DCM_los2sat = quat2dcm(q_los2sat);
     DCM_sat2ant = quat2dcm(q_sat2and);
-    DCM_los2ant = simplify(DCM_los2sat*DCM_sat2ant);
+    %DCM_los2ant = simplify(DCM_los2sat*DCM_sat2ant);
 
     % get w_LOS2ANT
     w_los2ant = DCM_sat2ant*w_sat + w_ant;
 
     e_phi_dot = -w_los2ant(1);  % For roll (phi)
     e_theta_dot = -w_los2and(3);  % For pitch (theta)
-
-    % construct x_dot
-    x_dot = [v; a; dw_sat; dw_ant; dq_los2sat; dq_sat2ant; e_phi_dot; e_theta_dot];
 
     % form constraints
     phi_ant = acos(DCM_sat2ant(1,1));
@@ -350,6 +355,7 @@ function y_dot = bvp_ode(y)
     u4 = get_u4(lambda_11, mu_7, mu_8);
     u5 = get_u5(lambda_12, mu_9, mu_10);
     %}
+
     mu = zeros(10, 1);
 
     if C(1) >= 0
@@ -386,32 +392,65 @@ function y_dot = bvp_ode(y)
         u5 = -gamma_4;
         mu(10) = get_mu_10;
     end
+ 
+    % heaveside step functions for state constraint
+    if phi_ant - gamma_1 >= 0
+        I_g1 = 0;
+    else
+        I_g1 = 1;
+    end
 
-    %}
- 
- 
+    if -phi_ant - gamma_1 >= 0
+        I_g2 = 0;
+    else
+        I_g2 = 1;
+    end
+
+    if theta_ant - gamma_2 >= 0
+        I_g3 = 0;
+    else
+        I_g3 = 1;
+    end
+
+    if -theta_ant - gamma_2 >= 0
+        I_g4 = 0;
+    else
+        I_g4 = 1;
+    end
+
     % state constrained x_dot
-    x_dot_np1 = [phi_ant - gamma_1; -phi_ant - gamma_1;...
-        theta_ant - gamma_2; -theta_ant - gamma_2];
+    x_dot_np1 = [(phi_ant - gamma_1)^2*I_g1;...
+        (-phi_ant - gamma_1)^2*I_g2;...
+        (theta_ant - gamma_2)^2*I_g3;...
+        (-theta_ant - gamma_2)^2*I_g4];
 
     % construct x_dot
     x_dot = [v; a; dw_sat; dw_ant; dq_los2sat;...
         dq_sat2ant; e_phi_dot; e_theta_dot; x_dot_np1];
 
+    lambda_dot = -get_2H2x(phi_ddot, th_ddot, phi_dot, rho_dot,...
+        th_dot, lambda_1, lambda_2, lambda_3, lambda_4, lambda_5,...
+        lambda_6, lambda_7, lambda_8, lambda_9, lambda_10,...
+        lambda_11, lambda_13, lambda_14, lambda_15, lambda_16,...
+        lambda_17, lambda_18, lambda_19, lambda_20, lambda_21,...
+        lambda_22, lambda_23, lambda_24, lambda_25, lambda_26,...
+        w_ant(1), w_ant(2), w_ant(3), w_sat(1), w_sat(2), w_sat(3),...
+        phi, q_ant_1, q_ant_2, q_ant_3, q_ant_4, q_sat_1, q_sat_2,...
+        q_sat_3, q_sat_4, rho, u1, u2, u3, x_np1(3), x_np1(4));
 
-
- 
-
+    y_dot = [x_dot; lambda_dot]';
 end
 
 function bcs = bvp_bcs(yi, yf)
-    R = 6000000;
+    R = 6000000; % can be changed based on rho IC
+
     bcs = [yi(1)-R, yi(2), yi(3), yi(4), yi(5), yi(6),...
         yi(7), yi(8), yi(9), yi(10), yi(11), yi(12), yi(13),...
         yi(14), yi(15), yi(16), yi(17), yi(18), yi(19), yi(20),...
         yi(21), yi(22), yf(1)-yi(1), yf(2)-yi(2), yf(3)-yi(3),...
         yf(4)-yi(4), yf(5)-yi(5), yf(6)-yi(6),...
         yf(7), yf(8), yf(9), yf(10), yf(11), yf(12), yf(13),...
-        yf(14), yf(15), yf(16), yf(17), yf(18), yf(19), yf(20),...
-        yf(21), yf(22)];
+        yf(14), yf(15), yf(16), yf(17), yf(18), yf(19), yf(20), yf(21),...
+        yf(22), yf(23), yi(23), yf(24), yi(24), yf(25), yi(25),...
+        yf(26), yi(26)];
 end
