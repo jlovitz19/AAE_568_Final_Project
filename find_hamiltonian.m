@@ -151,6 +151,13 @@ sol = solve(dH_du.' == 0, u);
 %sol = struct2array(sol);
 %sol = simplify(sol, 'IgnoreAnalyticConstraints', true, 'Steps', 50);
 
+mu_soln = solve(dH_du.' == 0, mu);
+names = fieldnames(mu_soln);
+for idx = 1:numel(names)
+    matlabFunction(mu_soln.(names{idx}), 'File', ['get_', names{idx}]);
+end
+
+
 u_1_func = matlabFunction(sol.u_1, 'File', 'get_u1.m');
 u_2_func = matlabFunction(sol.u_2, 'File', 'get_u2.m');
 u_3_func = matlabFunction(sol.u_3, 'File', 'get_u3.m');
@@ -191,6 +198,7 @@ u2 = solve(del_H_del_u(1, 2), u_2);
 u3 = solve(del_H_del_u(1, 3), u_3);
 u4 = solve(del_H_del_u(1, 4), u_4);
 u5 = solve(del_H_del_u(1, 5), u_5);
+
 
 %%% end of E-L equations %%%
 
