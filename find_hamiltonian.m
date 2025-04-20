@@ -262,6 +262,11 @@ function y_dot = bvp_ode(y)
     lambda_21 = y(43);
     lambda_22 = y(44);
 
+    % state constraint states
+    x_np1 = y(45:48);
+    lamba_np1 = y(49:52);
+
+
     u1 = -(3125000*lambda_7)/(56683*(7830*q_ant_2^3*q_ant_3 -...
         7830*q_ant_2^3*q_ant_4 + 7250*q_ant_1*q_ant_2^3 +...
         29*q_ant_2^2*q_ant_3^2 + 7250*q_ant_2^2*q_ant_3*q_ant_4 +...
@@ -359,20 +364,26 @@ function y_dot = bvp_ode(y)
     phi_ant = acos(DCM_sat2ant(1,1));
     theta_ant = acos(DCM_sat2ant(3,3));
 
-    C = [phi_ant - gamma_1; -phi_ant - gamma_1;...
-        theta_ant - gamma_2; -theta_ant - gamma_2;...
-        u1-gamma_3; -u1-gamma_3; u2-gamma_3; -u2-gamma_3;...
+    C = [u1-gamma_3; -u1-gamma_3; u2-gamma_3; -u2-gamma_3;...
         u3-gamma_3; -u3-gamma_3; u4-gamma_4; -u4-gamma_4;...
         u5-gamma_4; -u5-gamma_4];
+    
     
     if C(1) >= 0
         mu2 = 0;
         mu3 = 0;
         mu4 = 0;
     end
+    %}
  
  
- 
+    % state constrained x_dot
+    x_dot_np1 = [phi_ant - gamma_1; -phi_ant - gamma_1;...
+        theta_ant - gamma_2; -theta_ant - gamma_2];
+
+    % construct x_dot
+    x_dot = [v; a; dw_sat; dw_ant; dq_los2sat;...
+        dq_sat2ant; e_phi_dot; e_theta_dot; x_dot_np1];
 
  
 
