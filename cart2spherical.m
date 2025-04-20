@@ -8,11 +8,11 @@ Outputs:
   theta     - azimuth (longitude in xy-plane) [rad]
   phi       - polar angle (from +z) [rad]
   dr        - radial velocity [m/s]
-  dtheta    - azimuthal rate [rad/s]
   dphi      - polar angle rate [rad/s]
+  dtheta    - azimuthal rate [rad/s]
   ddr       - radial acceleration [m/s^2]
-  ddtheta   - azimuthal acceleration [rad/s^2]
   ddphi     - polar angle acceleration [rad/s^2]
+  ddtheta   - azimuthal acceleration [rad/s^2]
 
 %}
 function x_sphere = cart2spherical(x_cart)
@@ -36,13 +36,6 @@ ddr = (2.*dx.^2 + 2.*dy.^2 + 2.*dz.^2 +...
     (2.*x.*dx + 2.*y.*dy + 2.*z.*dz).^2 ./...
     (4.*(x.^2 + y.^2 + z.^2).^(3/2));
 
-% Azimuth angle and its derivatives
-theta = sign(y).*acos(x./sqrt(x.^2+y.^2));
-dtheta = (dy./x - (y.*dx)./x.^2) ./ (y.^2./x.^2 + 1);
-ddtheta = (ddy./x - (2.*dx.*dy)./x.^2 + (2.*y.*dx.^2)./x.^3 -...
-    (y.*ddx)./x.^2) ./ (y.^2./x.^2 + 1) - ((dy./x - (y.*dx)./x.^2) .*...
-    ((2.*y.*dy)./x.^2 - (2.*y.^2.*dx)./x.^3)) ./ (y.^2./x.^2 + 1).^2;
-
 % Polar angle and its derivatives
 phi   = acos(z ./ r);
 dphi = -(dz ./ (x.^2 + y.^2 + z.^2).^(1/2) -...
@@ -65,6 +58,13 @@ ddphi = -(ddz ./ (x.^2 + y.^2 + z.^2).^(1/2) ...
         (x.^2 + y.^2 + z.^2).^2)) ...
         ./ (2 .* (1 - z.^2 ./ (x.^2 + y.^2 + z.^2)).^(3/2));
 
-x_sphere = [r;theta;phi;dr;dtheta;dphi;ddr;ddtheta;ddphi];
+% Azimuth angle and its derivatives
+theta = sign(y).*acos(x./sqrt(x.^2+y.^2));
+dtheta = (dy./x - (y.*dx)./x.^2) ./ (y.^2./x.^2 + 1);
+ddtheta = (ddy./x - (2.*dx.*dy)./x.^2 + (2.*y.*dx.^2)./x.^3 -...
+    (y.*ddx)./x.^2) ./ (y.^2./x.^2 + 1) - ((dy./x - (y.*dx)./x.^2) .*...
+    ((2.*y.*dy)./x.^2 - (2.*y.^2.*dx)./x.^3)) ./ (y.^2./x.^2 + 1).^2;
+
+x_sphere = [r;theta;phi;dr;dphi;dtheta;ddr;ddphi;ddtheta];
 
 end
