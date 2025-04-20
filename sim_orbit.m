@@ -24,7 +24,7 @@ if nargin < 2
     % one orbital period (s)
 end
 if nargin < 3
-   m = 0; % If no input given for m, assume zero
+   m = 61.6; % If no input given for m, assume zero
 end
 if nargin < 4
     a_d = zeros(3,1); % If no control input given --> assume no control

@@ -12,20 +12,22 @@ l1 = .5; %m
 l2 = .75;
 I = PMOI_rectangular_prism(m, [l1;l1;l2] / 1000);
 
-% define time
-tv = linspace(0, 84000, 1000);
+% Define circular orbit IC's where orbital semi major axis is same as ISS
+% Convention: 
+%     [semi-major axis (m); eccentricity; inclincation (rad); RAAN (rad);
+%      arg periapsis (rad); mean anomaly (rad)]
+a = 460e3+6.37836e6; % semi major axis --> radius of Earth plus alt.
+x0 = [a;0;0;0;0];
 
-% define IC (arbitrarily)
-% x is quaternions, wumbos
-x0 = [0;0;0;1; .01; -.01; .1];
+% Sim orbit returns keplerian elements
+[t,circ_orbit_kep] = sim_orbit(x0);
+% Convert kepler --> cartesian --> spherical
+% Convention: [r; theta; phi; dr; dtheta; dphi; ddr; ddtheta; ddphi]
+circ_orbit_cart = kep2cart(circ_orbit_kep);
+circ_orbit = cart2spherical(circ_orbit_cart);
 
-
-% solve ode
-opts = odeset('RelTol',1e-6, 'AbsTol',1e-6);
-[~, y] = ode45(@(t,y) sim_KDE_DDE(y, diag(I)), tv, x0, opts);
-
-[t,x] = sim_circular_orbit([6371+h;0;0;0;0;0],tv);
-circ_orbit = kep2cart(x);
+%{
+Attitude component to be revised
 
 figure
 for idx = 1:4
@@ -38,7 +40,6 @@ for idx = 1:4
 end
 sgtitle('Quaternions', 'Interpreter', 'latex')
 
-
 figure
 for idx = 1:3
     subplot(3,1,idx)
@@ -49,12 +50,15 @@ for idx = 1:3
     title(['$\omega_' num2str(idx) '$'], 'Interpreter', 'latex')
 end    
 sgtitle('Angular Velocities', 'Interpreter', 'latex')
+%}
 
+% Plot orbit and Earth
 figure
-plot3(circ_orbit(1,:), circ_orbit(2,:), circ_orbit(3,:))
-xlabel('km', 'Interpreter', 'latex')
-ylabel('km', 'Interpreter', 'latex')
-zlabel('km', 'Interpreter', 'latex')
-grid
-title('Circular Orbit', 'Interpreter', 'latex')
-axis equal
+plot3(circ_orbit_cart(1,:),circ_orbit_cart(2,:),circ_orbit_cart(3,:))
+title("Cartesian Plot of Simple Circular Orbit",'fontsize',12,...
+    "Interpreter","Latex");
+grid on;
+axis equal;
+xlabel("$x (m)$","Interpreter","Latex");
+ylabel("$y (m)$","Interpreter","Latex");
+zlabel("$z (m)$","Interpreter","Latex");
