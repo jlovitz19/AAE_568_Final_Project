@@ -52,11 +52,11 @@ sgtitle('Angular Velocities', 'Interpreter', 'latex')
 
 % Plot orbit in cartesian
 figure
-plot3(circ_orbit_cart(1,:),circ_orbit_cart(2,:),circ_orbit_cart(3,:))
+plot3(circ_orbit_cart(1,:) / 1000 ,circ_orbit_cart(2,:)/1000,circ_orbit_cart(3,:)/1000)
 title("Cartesian Plot of Simple Circular Orbit",'fontsize',12,...
     "Interpreter","Latex");
 grid on;
 axis equal;
-xlabel("$x (m)$","Interpreter","Latex");
-ylabel("$y (m)$","Interpreter","Latex");
-zlabel("$z (m)$","Interpreter","Latex");
+xlabel("x [km]","Interpreter","Latex");
+ylabel("y [km]","Interpreter","Latex");
+zlabel("z [km]","Interpreter","Latex");
