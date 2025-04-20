@@ -3,8 +3,6 @@ clc; clear; close all;
 % add attitude functions to path
 run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 
-% define physical parameters
-h = 1000; %km
 
 % define moi of object
 m = 250; %kg
@@ -17,13 +15,13 @@ I = PMOI_rectangular_prism(m, [l1;l1;l2] / 1000);
 %     [semi-major axis (m); eccentricity; inclincation (rad); RAAN (rad);
 %      arg periapsis (rad); mean anomaly (rad)]
 a = 460e3+6.37836e6; % semi major axis --> radius of Earth plus alt.
-x0 = [a;0;0;0;0];
+x0 = [a;0;0;0;0;0];
 
 % Sim orbit returns keplerian elements
 [t,circ_orbit_kep] = sim_orbit(x0);
 % Convert kepler --> cartesian --> spherical
 % Convention: [r; theta; phi; dr; dtheta; dphi; ddr; ddtheta; ddphi]
-circ_orbit_cart = kep2cart(circ_orbit_kep);
+circ_orbit_cart = kep2cart(circ_orbit_kep); % save cart coords for plotting
 circ_orbit = cart2spherical(circ_orbit_cart);
 
 %{
@@ -52,7 +50,7 @@ end
 sgtitle('Angular Velocities', 'Interpreter', 'latex')
 %}
 
-% Plot orbit and Earth
+% Plot orbit in cartesian
 figure
 plot3(circ_orbit_cart(1,:),circ_orbit_cart(2,:),circ_orbit_cart(3,:))
 title("Cartesian Plot of Simple Circular Orbit",'fontsize',12,...
