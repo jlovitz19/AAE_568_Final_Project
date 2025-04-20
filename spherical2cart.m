@@ -11,6 +11,5 @@ z = rho.*cos(theta);
 
 cart_vec = [x;y;z];
 
-
 end
 
