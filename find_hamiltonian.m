@@ -172,3 +172,203 @@ u_func = matlabFunction(u_star, 'Vars', {x1, x2, x3, x4, x5, ...
                                          lambda4, lambda5});
 
 %}
+
+% lamba dot = 2H/2x
+del_H_del_x = jacobian(H, x);
+lamba_dot = -del_H_del_x;
+
+% 2H/2u = 0
+del_H_del_u = jacobian(H, u) == zeros(1, 5);
+u1 = solve(del_H_del_u(1, 1), u_1);
+u2 = solve(del_H_del_u(1, 2), u_2);
+u3 = solve(del_H_del_u(1, 3), u_3);
+u4 = solve(del_H_del_u(1, 4), u_4);
+u5 = solve(del_H_del_u(1, 5), u_5);
+
+%%% end of E-L equations %%%
+
+%%% start of 2-pt bvp %%%
+
+
+
+%{
+
+u_func = matlabFunction(u_star, 'Vars', {x1, x2, x3, x4, x5, ...
+                                         lambda1, lambda2, lambda3,
+                                         lambda4, lambda5});
+
+%}
+function y_dot = bvp_ode(y)
+    % antenna limits
+    gamma_1 = 15*pi/180;
+    gamma_2 = 15*pi/180;
+
+    rho = y(1);
+    psi = y(2);
+    theta = y(3);
+
+    rho_dot = y(4);
+    psi_dot = y(5);
+    th_dot = y(6);
+
+    w_sat = y(7:9);
+    w_ant = y(10:12);
+
+    q_los2sat = y(13:16);
+    q_sat2ant = y(17:20);
+
+    q_sat_1 = q_los2sat(1);
+    q_sat_2 = q_los2sat(2);
+    q_sat_3 = q_los2sat(3);
+    q_sat_4 = q_los2sat(4);
+
+    q_ant_1 = q_sat2ant(1);
+    q_ant_2 = q_sat2ant(2);
+    q_ant_3 = q_sat2ant(3);
+    q_ant_4 = q_sat2ant(4);
+
+    e_psi = y(21);
+    e_theta = y(22);
+
+    lambda_1 = y(23);
+    lambda_2 = y(24);
+    lambda_3 = y(25);
+    lambda_4 = y(26);
+    lambda_5 = y(27);
+    lambda_6 = y(28);
+    lambda_7 = y(29);
+    lambda_8 = y(30);
+    lambda_9 = y(31);
+    lambda_10 = y(32);
+    lambda_11 = y(33);
+    lambda_12 = y(34);
+    lambda_13 = y(35);
+    lambda_14 = y(36);
+    lambda_15 = y(37);
+    lambda_16 = y(38);
+    lambda_17 = y(39);
+    lambda_18 = y(40);
+    lambda_19 = y(41);
+    lambda_20 = y(42);
+    lambda_21 = y(43);
+    lambda_22 = y(44);
+
+    u1 = -(3125000*lambda_7)/(56683*(7830*q_ant_2^3*q_ant_3 -...
+        7830*q_ant_2^3*q_ant_4 + 7250*q_ant_1*q_ant_2^3 +...
+        29*q_ant_2^2*q_ant_3^2 + 7250*q_ant_2^2*q_ant_3*q_ant_4 +...
+        7830*q_ant_1*q_ant_2^2*q_ant_3 - 29*q_ant_2^2*q_ant_4^2 +...
+        7830*q_ant_1*q_ant_2^2*q_ant_4 + 7830*q_ant_2*q_ant_3^3 -...
+        7830*q_ant_2*q_ant_3^2*q_ant_4 +...
+        7250*q_ant_1*q_ant_2*q_ant_3^2 +...
+        15660*q_ant_2*q_ant_3*q_ant_4^2 +...
+        58*q_ant_1*q_ant_2*q_ant_3*q_ant_4 -...
+        7830*q_ant_2*q_ant_3 + 3915*q_ant_2*q_ant_4 -...
+        3625*q_ant_1*q_ant_2 + 29*q_ant_3^4 + 7250*q_ant_3^3*q_ant_4 +...
+        7830*q_ant_1*q_ant_3^3 + 29*q_ant_3^2*q_ant_4^2 -...
+        7830*q_ant_1*q_ant_3^2*q_ant_4 - 29*q_ant_3^2 -...
+        3625*q_ant_3*q_ant_4 - 3915*q_ant_1*q_ant_3 + 4726));
+
+    u2 = -(3125000*lambda_8)/(56683*(- 7830*q_ant_2^3*q_ant_3 +...
+        7830*q_ant_2^3*q_ant_4 - 7250*q_ant_1*q_ant_2^3 -...
+        29*q_ant_2^2*q_ant_3^2 + 7250*q_ant_2^2*q_ant_3*q_ant_4 -...
+        7830*q_ant_1*q_ant_2^2*q_ant_3 + 29*q_ant_2^2*q_ant_4^2 -...
+        7830*q_ant_1*q_ant_2^2*q_ant_4 +...
+        15660*q_ant_2*q_ant_3^2*q_ant_4 -...
+        7830*q_ant_2*q_ant_3*q_ant_4^2 -...
+        58*q_ant_1*q_ant_2*q_ant_3*q_ant_4 + 3915*q_ant_2*q_ant_3 +...
+        7830*q_ant_2*q_ant_4^3 - 7250*q_ant_1*q_ant_2*q_ant_4^2 -...
+        7830*q_ant_2*q_ant_4 + 3625*q_ant_1*q_ant_2 +...
+        29*q_ant_3^2*q_ant_4^2 + 7250*q_ant_3*q_ant_4^3 +...
+        7830*q_ant_1*q_ant_3*q_ant_4^2 - 3625*q_ant_3*q_ant_4 +...
+        29*q_ant_4^4 - 7830*q_ant_1*q_ant_4^3 - 29*q_ant_4^2 +...
+        3915*q_ant_1*q_ant_4 + 4726));
+
+    u3 = (12500000*lambda_9)/(56683*(58000*q_ant_2^2*q_ant_3*q_ant_4 +...
+        31320*q_ant_2*q_ant_3^3 + 31320*q_ant_2*q_ant_3^2*q_ant_4 +...
+        29000*q_ant_1*q_ant_2*q_ant_3^2 +...
+        31320*q_ant_2*q_ant_3*q_ant_4^2 - 15660*q_ant_2*q_ant_3 +...
+        31320*q_ant_2*q_ant_4^3 - 29000*q_ant_1*q_ant_2*q_ant_4^2 -...
+        15660*q_ant_2*q_ant_4 + 116*q_ant_3^4 +...
+        29000*q_ant_3^3*q_ant_4 + 31320*q_ant_1*q_ant_3^3 +...
+        232*q_ant_3^2*q_ant_4^2 - 31320*q_ant_1*q_ant_3^2*q_ant_4 -...
+        116*q_ant_3^2 + 29000*q_ant_3*q_ant_4^3 +...
+        31320*q_ant_1*q_ant_3*q_ant_4^2 - 29000*q_ant_3*q_ant_4 -...
+        15660*q_ant_1*q_ant_3 + 116*q_ant_4^4 -...
+        31320*q_ant_1*q_ant_4^3 - 116*q_ant_4^2 +...
+        15660*q_ant_1*q_ant_4 - 18875));
+
+    u4 = -(117187500*lambda_11)/14723387;
+
+    u5 = -(1500000*lambda_12)/359107;
+
+    % cunstruct x_dot
+
+    % get vel and acc
+    v = [rho_dot; rho*psi_dot; rho*th_d*sin(psi)];
+    a = [
+        (rho_ddot - rho*psi_d^2 - rho*th_d^2*sin(psi)^2);
+        rho*psi_ddot + 2*rho_dot*psi_dot - rho*th_dot^2*sin(psi)*cos(psi);
+        rho*th_ddot*sin(psi) + 2*rho_dot*th_dot*sin(psi) + 2*rho*psi_dot*th_dot*cos(psi)
+    ];
+
+    % get wumbo rate of satellite body wrt inertial (note order of u_s to axis # !)
+    % recall dw wants inertia tensor diagonal soo
+    dw_sat = [
+        (-(I_total(3,3) - I_total(2,2))*w_sat(2)*w_sat(3) + u1)/I_total(1,1);
+        (-(I_total(1,1) - I_total(3,3))*w_sat(3)*w_sat(1) + u_2)/I_total(2,2);
+        (-(I_total(2,2) - I_total(1,1))*w_sat(1)*w_sat(2) + u_3)/I_total(3,3);
+    ];
+
+    % get quanternion rate LOS2SAT
+    dq_los2sat = quat_kde(q_los2sat, w_sat);
+
+    % get antenna body w wrt sat body (note a_1 a_2 is roll. let 
+    dw_ant = [
+        (-(I_ant(3,3) - I_ant(2,2))*w_ant(2)*w_ant(3))/I_ant(1,1);
+        (-(I_ant(1,1) - I_ant(3,3))*w_ant(3)*w_ant(1) + u_4)/I_ant(2,2);
+        (-(I_ant(2,2) - I_ant(1,1))*w_ant(1)*w_ant(2) + u_5)/I_ant(3,3);
+    ];
+
+    % quaternion rate SAT2ANT
+    dq_sat2ant = quat_kde(q_sat2ant, w_ant); 
+
+    % get DCM LOS2ANT 
+    DCM_los2sat = quat2dcm(q_los2sat);
+    DCM_sat2ant = quat2dcm(q_sat2and);
+    DCM_los2ant = simplify(DCM_los2sat*DCM_sat2ant);
+
+    % get w_LOS2ANT
+    w_los2ant = DCM_sat2ant*w_sat + w_ant;
+
+    e_phi_dot = -w_los2ant(1);  % For roll (phi)
+    e_theta_dot = -w_los2and(3);  % For pitch (theta)
+
+    % construct x_dot
+    x_dot = [v; a; dw_sat; dw_ant; dq_los2sat; dq_sat2ant; e_phi_dot; e_theta_dot];
+
+    % form constraints
+    phi_ant = acos(DCM_sat2ant(1,1));
+    theta_ant = acos(DCM_sat2ant(3,3));
+
+    C = [phi_ant - gamma_1; -phi_ant - gamma_1;...
+        theta_ant - gamma_2; -theta_ant - gamma_2];
+
+    if C(1) >= 0
+        mu2 = 0;
+        mu3 = 0;
+        mu4 = 0;
+    end
+ 
+ 
+ 
+
+ 
+
+end
+
+function bcs = bvp_bcs(yi, yf)
+    R = 6000000;
+    bcs = [yi(1)-R, yi(2), yi(3), yi(13), yi(14), yi(15), yi(16)-1,...
+        yi(17), yi(18), yi(19), yi(20)-1, yf(1)-R, yf(2), yf(3), yf(13),...
+        yf(14), yf(15), yf(16)-1, yf(17), yf(18), yf(19), yf(20)-1];
+end
