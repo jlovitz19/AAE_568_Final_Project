@@ -59,7 +59,7 @@ R = blkdiag(R_, I_ant(1:2, 1:2)); % davis correct me if im wrong but I(3,3) woul
 
 % form costate
 lambda = [lambda_1 lambda_2 lambda_3 lambda_4 lambda_5 lambda_6 lambda_7 lambda_8 lambda_9 lambda_10 lambda_11 lambda_12 lambda_13 lambda_14 lambda_15 lambda_16 lambda_17 lambda_18 lambda_19 lambda_20 lambda_21 lambda_22].';
-mu = [mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10 mu_11 mu_12 mu_13 mu_14].';
+mu = [mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10].';
 
 %% dynamics !
 
@@ -124,7 +124,7 @@ c_max_torque = [
     u_4 - u_ant_max; -u_4 - u_ant_max
     u_5 - u_ant_max; -u_5 - u_ant_max
     ];
-c = [c_ant_angle; c_max_torque];
+c = c_max_torque; %[c_ant_angle; c_max_torque];
 % finally form the state vector 
 dx = [
   v;
@@ -354,42 +354,37 @@ function y_dot = bvp_ode(y)
 
     if C(1) >= 0
         u1 = gamma_3;
-        % back calculate for mu
+        mu(1) = get_mu_1(lambda_7, q_ant_1,...
+            q_ant_2, q_ant_3, q_ant_4, u1);
     elseif C(2) >= 0
         u1 = -gamma_3;
-        % back calc
+        mu(2) = get_mu_2;
     elseif C(3) >= 0
-        % mu(3) will be found in a sec
         u2 = gamma_3;
-        % back calculate for mu
+        mu(3) = get_mu_3(lambda_8, q_ant_1,...
+            q_ant_2, q_ant_3, q_ant_4, u2);
     elseif C(4) >= 0
-        % mu(4) will be found in a sec
         u2 = -gamma_3;
-        % back calculate for mu
+        mu(4) = get_mu_4;
     elseif C(5) >= 0
-        % mu(5) will be found in a sec
         u3 = gamma_3;
-        % back calculate for mu
+        mu(5) = get_mu_5(lambda_9, q_ant_1,...
+            q_ant_2, q_ant_3, q_ant_4, u3);
     elseif C(6) >= 0
-        % mu(6) will be found in a sec
         u3 = -gamma_3;
-        % back calculate for mu
+        mu(6) = get_mu_6;
     elseif C(7) >= 0
-        % mu(7) will be found in a sec
         u4 = gamma_4;
-        % back calculate for mu
+        mu(7) = get_mu_7(lambda_11, u4);
     elseif C(8) >= 0
-        % mu(8) will be found in a sec
         u4 = -gamma_4;
-        % back calculate for mu
+        mu(8) = get_mu_8;
     elseif C(9) >= 0
-        % mu(9) will be found in a sec
         u5 = gamma_4;
-        % back calculate for mu
+        mu(9) = get_mu_9(lambda_12, u5);
     elseif C(10) >= 0
-        % mu(10) will be found in a sec
         u5 = -gamma_4;
-        % back calculate for mu
+        mu(10) = get_mu_10;
     end
 
     %}
