@@ -365,12 +365,6 @@ function y_dot = bvp_ode(y)
         mu3 = 0;
         mu4 = 0;
     end
- 
- 
- 
-
- 
-
 end
 
 function bcs = bvp_bcs(yi, yf)

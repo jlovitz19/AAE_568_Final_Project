@@ -13,7 +13,6 @@ Outputs:
   ddr       - radial acceleration [m/s^2]
   ddphi     - polar angle acceleration [rad/s^2]
   ddtheta   - azimuthal acceleration [rad/s^2]
-
 %}
 function x_sphere = cart2spherical(x_cart)
 
