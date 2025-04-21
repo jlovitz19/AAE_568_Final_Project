@@ -22,6 +22,9 @@ param.I_total = I_total;
 G = 6.6743e-11; % Gravitational constant (m/s^)/(kg/m^2)
 Me = 5.9722e24;  % Earth mass (kg)
 mu = G*(Me+m);   % Gravitational constant mu
+% Add parameters for bvp4c
+param.mu = mu;
+param.m = m;
 
 %% Trajectory sim
 % Define circular orbit IC's where orbital semi major axis is same as ISS

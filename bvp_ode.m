@@ -88,20 +88,33 @@ function y_dot = bvp_ode(t, y, param)
 
     % cunstruct x_dot
 
+    % IDEA FOR REPLACEMENT
+    mu = param.mu;
+    a_rho = -mu/rho^2;
+    v = [rho_dot; rho*phi_dot; rho*th_dot*sin(phi)];
+
+    rho_ddot = a_rho + rho*phi_dot^2 + rho*th_dot^2*sin(phi)^2;
+    phi_ddot = (-2*rho_dot*phi_dot + rho*th_dot^2*sin(phi)*cos(phi))/rho;
+    th_ddot = (-2*rho_dot*th_dot*sin(phi) - 2*rho*phi_dot*th_dot*cos(phi))/(rho*sin(phi));
+
+    a = [rho_ddot; phi_ddot; th_ddot];
+
+    %{
     % get vel and acc
     v = [rho_dot; rho*phi_dot; rho*th_dot*sin(phi)];
     a = [
-        (rho_ddot - rho*phi_d^2 - rho*th_dot^2*sin(phi)^2);
+        (rho_ddot - rho*phi_dot^2 - rho*th_dot^2*sin(phi)^2);
         rho*phi_ddot + 2*rho_dot*phi_dot - rho*th_dot^2*sin(phi)*cos(phi);
         rho*th_ddot*sin(phi) + 2*rho_dot*th_dot*sin(phi) + 2*rho*phi_dot*th_dot*cos(phi)
     ];
+    %}
 
     % get wumbo rate of satellite body wrt inertial (note order of u_s to axis # !)
     % recall dw wants inertia tensor diagonal soo
     dw_sat = [
         (-(I_total(3,3) - I_total(2,2))*w_sat(2)*w_sat(3) + u1)/I_total(1,1);
-        (-(I_total(1,1) - I_total(3,3))*w_sat(3)*w_sat(1) + u_2)/I_total(2,2);
-        (-(I_total(2,2) - I_total(1,1))*w_sat(1)*w_sat(2) + u_3)/I_total(3,3);
+        (-(I_total(1,1) - I_total(3,3))*w_sat(3)*w_sat(1) + u2)/I_total(2,2);
+        (-(I_total(2,2) - I_total(1,1))*w_sat(1)*w_sat(2) + u3)/I_total(3,3);
     ];
 
     % get quanternion rate LOS2SAT
