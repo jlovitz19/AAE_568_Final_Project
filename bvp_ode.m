@@ -123,8 +123,8 @@ function y_dot = bvp_ode(t, y, param)
     % get antenna body w wrt sat body (note a_1 a_2 is roll. let 
     dw_ant = [
         (-(I_ant(3,3) - I_ant(2,2))*w_ant(2)*w_ant(3))/I_ant(1,1);
-        (-(I_ant(1,1) - I_ant(3,3))*w_ant(3)*w_ant(1) + u_4)/I_ant(2,2);
-        (-(I_ant(2,2) - I_ant(1,1))*w_ant(1)*w_ant(2) + u_5)/I_ant(3,3);
+        (-(I_ant(1,1) - I_ant(3,3))*w_ant(3)*w_ant(1) + u4)/I_ant(2,2);
+        (-(I_ant(2,2) - I_ant(1,1))*w_ant(1)*w_ant(2) + u5)/I_ant(3,3);
     ];
 
     % quaternion rate SAT2ANT
@@ -132,14 +132,14 @@ function y_dot = bvp_ode(t, y, param)
 
     % get DCM LOS2ANT 
     DCM_los2sat = quat2dcm(q_los2sat);
-    DCM_sat2ant = quat2dcm(q_sat2and);
+    DCM_sat2ant = quat2dcm(q_sat2ant);
     %DCM_los2ant = simplify(DCM_los2sat*DCM_sat2ant);
 
     % get w_LOS2ANT
     w_los2ant = DCM_sat2ant*w_sat + w_ant;
 
     e_phi_dot = -w_los2ant(1);  % For roll (phi)
-    e_theta_dot = -w_los2and(3);  % For pitch (theta)
+    e_theta_dot = -w_los2ant(3);  % For pitch (theta)
 
     % form constraints
     phi_ant = acos(DCM_sat2ant(1,1));
