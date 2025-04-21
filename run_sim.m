@@ -36,7 +36,8 @@ a = 460e3+6.37836e6; ecc = 0; inc = 0; omeg = 0; wumbo = 0; M = 0;
 x0 = [a;ecc;inc;omeg;wumbo;M];
 
 % Sim orbit returns keplerian elements
-[t,circ_orbit_kep] = sim_orbit(x0);
+t = 0:1:100; % NOTE: SET t FOR TESTING, NORMALLY AUTOMATICALLY SET
+[t,circ_orbit_kep] = sim_orbit(x0,t);
 % Convert kepler --> cartesian --> spherical
 % Convention: [r; theta; phi; dr; dtheta; dphi; ddr; ddtheta; ddphi]
 circ_orbit_cart = kep2cart(circ_orbit_kep); % save cart coords for plotting
