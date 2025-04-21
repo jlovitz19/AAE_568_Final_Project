@@ -89,9 +89,9 @@ function y_dot = bvp_ode(t, y, param)
     % cunstruct x_dot
 
     % get vel and acc
-    v = [rho_dot; rho*phi_dot; rho*th_d*sin(phi)];
+    v = [rho_dot; rho*phi_dot; rho*th_dot*sin(phi)];
     a = [
-        (rho_ddot - rho*phi_d^2 - rho*th_d^2*sin(phi)^2);
+        (rho_ddot - rho*phi_d^2 - rho*th_dot^2*sin(phi)^2);
         rho*phi_ddot + 2*rho_dot*phi_dot - rho*th_dot^2*sin(phi)*cos(phi);
         rho*th_ddot*sin(phi) + 2*rho_dot*th_dot*sin(phi) + 2*rho*phi_dot*th_dot*cos(phi)
     ];

@@ -6,13 +6,15 @@ run(fullfile(fileparts(mfilename('fullpath')), 'add_to_path.m'));
 % Define moi of object
 m_sat = 50; % kg
 m_ant = 11.6; % kg
-m = 61.6; %kg
-l1 = .5; %m
-l2 = .5;
+m = 61.6; % total mass - kg
+l1 = .5; % m
+l2 = .5; % m
 I_sat = PMOI_rectangular_prism(m_sat, [l1;l1;l2]);
 [I_ant,CoM_ant] = ant_inertia(0.25,0.1,0.02,m_ant);
 % Use parallel axis theorem to calc total moment of inertia
 I_total = I_sat + parallel_axis_thm(CoM_ant, I_ant, m_ant);
+% Add parameters for bvp4c call
+param.I_ant = I_ant;
 param.I_total = I_total;
 
 % Orbital constants
@@ -24,14 +26,10 @@ mu = G*(Me+m);   % Gravitational constant mu
 %% Trajectory sim
 % Define circular orbit IC's where orbital semi major axis is same as ISS
 % Convention: 
-%     [semi-major axis (m); eccentricity; inclincation (rad); RAAN (rad);
-%      arg periapsis (rad); mean anomaly (rad)]
-a = 460e3+6.37836e6; % semi major axis --> radius of Earth plus alt.
-ecc = 0;
-inc = 0;
-omeg = 0;
-wumbo = 0;
-M = 0;
+% [semi-major axis (m); eccentricity; inclincation (rad); RAAN (rad);
+% arg periapsis (rad); mean anomaly (rad)]
+% Assume a = radius of earth + altitude
+a = 460e3+6.37836e6; ecc = 0; inc = 0; omeg = 0; wumbo = 0; M = 0;
 x0 = [a;ecc;inc;omeg;wumbo;M];
 
 % Sim orbit returns keplerian elements
@@ -40,8 +38,6 @@ x0 = [a;ecc;inc;omeg;wumbo;M];
 % Convention: [r; theta; phi; dr; dtheta; dphi; ddr; ddtheta; ddphi]
 circ_orbit_cart = kep2cart(circ_orbit_kep); % save cart coords for plotting
 circ_orbit = cart2spherical(circ_orbit_cart);
-
-%% Attitude sim
 
 %% Controller
 % Set up the boundary value problem (BVP)
@@ -61,8 +57,11 @@ solinit = bvpinit(t, init_guess);
 param.periapsis = a*(1-ecc);
 
 % Use bvp4c to solve the boundary value problem
+% Wrap ODE and BC with parameters
+odefun = @(x, y) bvp_ode(x, y, param);
+bcfun = @(ya, yb) bvp_bcs(ya, yb, param);
 opts = bvpset("AbsTol",1e-6,"RelTol", 1e-6);
-sol = bvp4c(@bvp_ode, @bvp_bcs, solinit, opts);
+sol = bvp4c(odefun, bcfun, solinit, opts);
 %%
 %{
 Attitude component to be revised
