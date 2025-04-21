@@ -70,12 +70,15 @@ mu = [mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10].';
 %% dynamics !
 
 % get vel and acc
-v = [drho; rho*dphi; rho*dtheta*sin(phi)];
-a = [
-    (ddrho - rho*dphi^2 - rho*dtheta^2 * sin(phi)^2);
-    rho*ddphi + 2*drho*dphi - rho*dtheta^2*sin(phi)*cos(phi);
-    rho*ddtheta*sin(phi) + 2*drho*dtheta*sin(phi) + 2*rho*dphi*dtheta*cos(phi)
-];
+%v = [drho; rho*dphi; rho*dtheta*sin(phi)];
+%a = [
+%   (ddrho - rho*dphi^2 - rho*dtheta^2 * sin(phi)^2);
+%    rho*ddphi + 2*drho*dphi - rho*dtheta^2*sin(phi)*cos(phi);
+%    rho*ddtheta*sin(phi) + 2*drho*dtheta*sin(phi) + 2*rho*dphi*dtheta*cos(phi)
+%];
+v = [drho; dphi; dtheta];
+a = [ddrho; ddphi; ddtheta];
+
 
 % get wumbo rate of satellite body wrt inertial (note order of u_s to axis # !)
 % recall dw wants inertia tensor diagonal soo
