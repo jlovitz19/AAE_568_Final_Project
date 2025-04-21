@@ -1,9 +1,9 @@
-function y_dot = bvp_ode(y, p)
+function y_dot = bvp_ode(t, y, param)
 % ode function for boundary value problem
 % 
 % paramaters:
 % y: vector containing state, costate, and constraint states and costates
-% p: extraneous parameters used in this function, consisting of a total
+% param: extraneous parameters used in this function, consisting of a total
 % inertia matrix and an antenna inertia matrix
 %
 % outputs:
@@ -83,8 +83,8 @@ function y_dot = bvp_ode(y, p)
     u5 = get_u5(lambda_12, 0, 0);
 
     % get inertia
-    I_total = p.I_total;
-    I_ant = p.I_ant;
+    I_total = param.I_total;
+    I_ant = param.I_ant;
 
     % cunstruct x_dot
 

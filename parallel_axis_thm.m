@@ -1,13 +1,17 @@
-function I = parallel_axis_thm(r_CG, m, I_C)
+function I = parallel_axis_thm(r_CG, I_C, m)
     % calculates I of a body using parallel axis theorem
     %
     % Parameters:
     % r_CG: distance of body from center of mass of system
-    % m: mass of body
     % I_C: mass of individual body
+    % m: mass of body
     %
     % Outputs:
     % T: new inertia matrix post-PAT
+
+    if nargin < 3
+        m = 11.6;
+    end
 
     x_G = r_CG(1);
     y_G = r_CG(2);
