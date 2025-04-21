@@ -439,6 +439,7 @@ function y_dot = bvp_ode(y, p)
         q_sat_3, q_sat_4, rho, u1, u2, u3, x_np1(3), x_np1(4));
 
     y_dot = [x_dot; lambda_dot]';
+
 end
 
 function bcs = bvp_bcs(yi, yf)
