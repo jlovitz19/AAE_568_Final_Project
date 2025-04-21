@@ -99,16 +99,6 @@ function y_dot = bvp_ode(t, y, param)
 
     a = [rho_ddot; phi_ddot; th_ddot];
 
-    %{
-    % get vel and acc
-    v = [rho_dot; rho*phi_dot; rho*th_dot*sin(phi)];
-    a = [
-        (rho_ddot - rho*phi_dot^2 - rho*th_dot^2*sin(phi)^2);
-        rho*phi_ddot + 2*rho_dot*phi_dot - rho*th_dot^2*sin(phi)*cos(phi);
-        rho*th_ddot*sin(phi) + 2*rho_dot*th_dot*sin(phi) + 2*rho*phi_dot*th_dot*cos(phi)
-    ];
-    %}
-
     % get wumbo rate of satellite body wrt inertial (note order of u_s to axis # !)
     % recall dw wants inertia tensor diagonal soo
     dw_sat = [

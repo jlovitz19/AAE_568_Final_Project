@@ -21,14 +21,12 @@ u_ant_max = 0.5; % Nm... arbitrary.. roughly 0.1-2 Nm range
 u_sat_max = 0.5; % Nm... arbitrary (and different from ant_max) roughly 0.05-0.5 Nm
 error_weight = 10; % arbitrary.. to be tuned
 
-
 % form state
 w_sat = [omega_sat_1, omega_sat_2, omega_sat_3].';
 w_ant = [omega_ant_1, omega_ant_2, omega_ant_3].';
 q_LOS2SAT = [q_sat_1, q_sat_2, q_sat_3, q_sat_4].';
 q_SAT2ANT = [q_ant_1, q_ant_2, q_ant_3, q_ant_4].';
 err = [e_phi, e_theta].';
-
 
 %% ORDER IS RHO, PHI, THETA %%
 
@@ -69,13 +67,19 @@ mu = [mu_1 mu_2 mu_3 mu_4 mu_5 mu_6 mu_7 mu_8 mu_9 mu_10].';
 
 %% dynamics !
 
+G = 6.6743e-11; % Gravitational constant (m/s^)/(kg/m^2)
+Me = 5.9722e24;  % Earth mass (kg)
+mu = G*(Me+m);   % Gravitational constant mu
+
 % get vel and acc
-v = [drho; rho*dphi; rho*dtheta*sin(phi)];
-a = [
-    (ddrho - rho*dphi^2 - rho*dtheta^2 * sin(phi)^2);
-    rho*ddphi + 2*drho*dphi - rho*dtheta^2*sin(phi)*cos(phi);
-    rho*ddtheta*sin(phi) + 2*drho*dtheta*sin(phi) + 2*rho*dphi*dtheta*cos(phi)
-];
+v = [rho_dot; rho*phi_dot; rho*th_dot*sin(phi)];
+
+a_rho = -mu/rho^2;
+rho_ddot = a_rho + rho*phi_dot^2 + rho*th_dot^2*sin(phi)^2;
+phi_ddot = (-2*rho_dot*phi_dot + rho*th_dot^2*sin(phi)*cos(phi))/rho;
+th_ddot = (-2*rho_dot*th_dot*sin(phi) - 2*rho*phi_dot*th_dot*cos(phi))/(rho*sin(phi));
+
+a = [rho_ddot; phi_ddot; th_ddot];
 
 % get wumbo rate of satellite body wrt inertial (note order of u_s to axis # !)
 % recall dw wants inertia tensor diagonal soo
