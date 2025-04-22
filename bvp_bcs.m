@@ -52,6 +52,10 @@ bcs_lambda = [
     yf(50);
     yf(51);
     yf(52);
+
+    % lambda corresponding to error
+    yi(47);
+    yi(48);
 ];
 
 % Initial quaternions
@@ -60,12 +64,15 @@ bcs_quat = [
     yi(13) - q_LOS2SAT0(1);
     yi(14) - q_LOS2SAT0(2);
     yi(15) - q_LOS2SAT0(3);
-    yi(16) - q_LOS2SAT0(4);
+    %yi(16) - q_LOS2SAT0(4);
     yi(17) - q_SAT2ANT0(1);
     yi(18) - q_SAT2ANT0(2);
     yi(19) - q_SAT2ANT0(3);
-    yi(20) - q_SAT2ANT0(4);
+    %yi(20) - q_SAT2ANT0(4);
+
     % Normalization constraint
+    yi(13)^2+yi(14)^2+yi(15)^2+yi(16)^2 - 1;
+    yi(17)^2+yi(18)^2+yi(19)^2+yi(20)^2 - 1;
     yf(13)^2+yf(14)^2+yf(15)^2+yf(16)^2 - 1;
     yf(17)^2+yf(18)^2+yf(19)^2+yf(20)^2 - 1;
 ];
