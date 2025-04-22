@@ -49,16 +49,40 @@ circ_orbit = cart2spherical(circ_orbit_cart);
 
 init_guess = NaN(1,52);  % Initial guess for state vec
 init_guess(1:6) = circ_orbit(1:6,1).'; % Initial spherical coords
-init_guess(7:12) = zeros(1,6); % Assume zero initial rotation except for:
-init_guess(9) = sqrt(mu)/(a^3); % w3 required for spin stabilization
-init_guess(13:16) = [0,0,0,1]; % Zero rotation quat i.e. point at earth
-init_guess(17:20) = [0,0,0,1]; % Zero rot quat i.e. ant line with sat
-init_guess(21:22) = [0,0]; % Assume initial error and rates = 0
-init_guess(23:52) = zeros(1,30);
+param.sphere0 = init_guess(1:6); % Add to parameters
+init_guess(7:12) = zeros(1,6); % Assume zero initial rotation
+
+
+% Initial quaternions
+q_LOS2SAT = [0,0,0,1]; % Zero rotation quat i.e. point at earth
+q_SAT2ANT = [0,0,0,1]; % Zero rot quat i.e. ant line with sat
+init_guess(13:16) = q_LOS2SAT; % Zero rotation quat i.e. point at earth
+init_guess(17:20) = q_SAT2ANT; % Zero rot quat i.e. ant line with sat
+
+
+% Guess initial errors
+% get DCM LOS2ANT 
+DCM_LOS2SAT = quat2dcm(q_LOS2SAT);
+DCM_SAT2ANT = quat2dcm(q_SAT2ANT);
+DCM_LOS2ANT = simplify(DCM_LOS2SAT*DCM_SAT2ANT);
+e_phi0 = acos(DCM_LOS2ANT(1,1));
+e_theta0 = acos(DCM_LOS2ANT(3,3)); % <-- this stuff feels suspect 2 me!
+init_guess(21:22) = [e_phi0, e_theta0]; % Initial error guess
+
+% Lambdas
+init_guess(23:52) = zeros(1,30); % Guess initial lambdas zero
+
+% Generate initial solution
 solinit = bvpinit(t, init_guess);
 
 % Parameters to pass to boundary value function
-param.periapsis = a*(1-ecc);
+param.periapsis = a*(1-ecc); % periapsis
+param.w0 = init_guess(7:12); % angular velocities
+param.q_LOS2SAT = q_LOS2SAT; % quaternijawns
+param.q_SAT2ANT = q_SAT2ANT;
+param.e_phi0 = e_phi0;       % errors
+param.e_theta0 = e_theta0;
+param.lambda0 = init_guess(23:52); % lambdas
 
 % Use bvp4c to solve the boundary value problem
 % Wrap ODE and BC with parameters
@@ -66,6 +90,16 @@ odefun = @(x, y) bvp_ode(x, y, param);
 bcfun = @(ya, yb) bvp_bcs(ya, yb, param);
 opts = bvpset("AbsTol",1e-6,"RelTol", 1e-6);
 sol = bvp4c(odefun, bcfun, solinit, opts);
+
+
+
+
+
+
+
+
+
+
 %%
 %{
 Attitude component to be revised
@@ -91,7 +125,6 @@ for idx = 1:3
     title(['$\omega_' num2str(idx) '$'], 'Interpreter', 'latex')
 end    
 sgtitle('Angular Velocities', 'Interpreter', 'latex')
-%}
 
 % Plot orbit in cartesian
 figure
@@ -103,3 +136,5 @@ axis equal;
 xlabel("x [km]","Interpreter","Latex");
 ylabel("y [km]","Interpreter","Latex");
 zlabel("z [km]","Interpreter","Latex");
+
+%}
