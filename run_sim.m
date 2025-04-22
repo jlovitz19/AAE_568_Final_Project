@@ -49,22 +49,19 @@ circ_orbit = cart2spherical(circ_orbit_cart);
 
 init_guess = NaN(1,52);  % Initial guess for state vec
 init_guess(1:6) = circ_orbit(1:6,1).'; % Initial spherical coords
-param.sphere0 = init_guess(1:6); % Add to parameters
 init_guess(7:12) = zeros(1,6); % Assume zero initial rotation
 
-
 % Initial quaternions
-q_LOS2SAT = [0,0,0,1]; % Zero rotation quat i.e. point at earth
-q_SAT2ANT = [0,0,0,1]; % Zero rot quat i.e. ant line with sat
-init_guess(13:16) = q_LOS2SAT; % Zero rotation quat i.e. point at earth
-init_guess(17:20) = q_SAT2ANT; % Zero rot quat i.e. ant line with sat
-
+q_LOS2SAT0 = [0,0,0,1]; % Zero rotation quat i.e. point at earth
+q_SAT2ANT0 = [0,0,0,1]; % Zero rot quat i.e. ant line with sat
+init_guess(13:16) = q_LOS2SAT0; % Zero rotation quat i.e. point at earth
+init_guess(17:20) = q_SAT2ANT0; % Zero rot quat i.e. ant line with sat
 
 % Guess initial errors
 % get DCM LOS2ANT 
 DCM_LOS2SAT = quat2dcm(q_LOS2SAT);
 DCM_SAT2ANT = quat2dcm(q_SAT2ANT);
-DCM_LOS2ANT = simplify(DCM_LOS2SAT*DCM_SAT2ANT);
+DCM_LOS2ANT = DCM_LOS2SAT*DCM_SAT2ANT;
 e_phi0 = acos(DCM_LOS2ANT(1,1));
 e_theta0 = acos(DCM_LOS2ANT(3,3)); % <-- this stuff feels suspect 2 me!
 init_guess(21:22) = [e_phi0, e_theta0]; % Initial error guess
@@ -76,10 +73,10 @@ init_guess(23:52) = zeros(1,30); % Guess initial lambdas zero
 solinit = bvpinit(t, init_guess);
 
 % Parameters to pass to boundary value function
-param.periapsis = a*(1-ecc); % periapsis
+param.sphere0 = init_guess(1:6); % Add to parameters
 param.w0 = init_guess(7:12); % angular velocities
-param.q_LOS2SAT = q_LOS2SAT; % quaternijawns
-param.q_SAT2ANT = q_SAT2ANT;
+param.q_LOS2SAT0 = q_LOS2SAT0; % quaternijawns
+param.q_SAT2ANT0 = q_SAT2ANT0;
 param.e_phi0 = e_phi0;       % errors
 param.e_theta0 = e_theta0;
 param.lambda0 = init_guess(23:52); % lambdas
