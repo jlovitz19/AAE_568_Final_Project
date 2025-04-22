@@ -1,4 +1,4 @@
-%% ALERT WE ARE STILL 4 CONSTRAINTS SHORT
+%% ALERT WE ARE STILL 2 CONSTRAINTS SHORT
 
 function bcs = bvp_bcs(yi,yf,param)
 % Extract parameters
@@ -8,7 +8,6 @@ q_SAT2ANT0 = param.q_SAT2ANT0;
 e_phi0 = param.e_phi0;
 e_theta0 = param.e_theta0;
 x_np1_0 = param.x_np1_0;
-lambda0 = param.lambda0;
 
 % Position and velocity in spherical coordinates
 bcs_sphere = [
@@ -57,7 +56,7 @@ bcs_lambda = [
 
 % Initial quaternions
 bcs_quat = [
-    % Initial
+    % Initial --> MIGHT BE OVERCONSRAINING QUATERNIONS
     yi(13) - q_LOS2SAT0(1);
     yi(14) - q_LOS2SAT0(2);
     yi(15) - q_LOS2SAT0(3);
@@ -66,6 +65,9 @@ bcs_quat = [
     yi(18) - q_SAT2ANT0(2);
     yi(19) - q_SAT2ANT0(3);
     yi(20) - q_SAT2ANT0(4);
+    % Normalization constraint
+    yf(13)^2+yf(14)^2+yf(15)^2+yf(16)^2 - 1;
+    yf(17)^2+yf(18)^2+yf(19)^2+yf(20)^2 - 1;
 ];
 
 % Error
