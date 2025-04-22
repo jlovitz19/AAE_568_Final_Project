@@ -1,3 +1,5 @@
+%% ALERT WE ARE STILL 4 CONSTRAINTS SHORT
+
 function bcs = bvp_bcs(yi,yf,param)
 % Extract parameters
 sphere0 = param.sphere0;
@@ -46,6 +48,11 @@ bcs_lambda = [
     yf(36);
     yf(37);
     yf(38);
+    % Lambdas corresponding to extra states
+    yf(49);
+    yf(50);
+    yf(51);
+    yf(52);
 ];
 
 % Initial quaternions
@@ -59,15 +66,6 @@ bcs_quat = [
     yi(18) - q_SAT2ANT0(2);
     yi(19) - q_SAT2ANT0(3);
     yi(20) - q_SAT2ANT0(4);
-    % Initial
-    yf(13) - q_LOS2SAT0(1);
-    yf(14) - q_LOS2SAT0(2);
-    yf(15) - q_LOS2SAT0(3);
-    yf(16) - q_LOS2SAT0(4);
-    yf(17) - q_SAT2ANT0(1);
-    yf(18) - q_SAT2ANT0(2);
-    yf(19) - q_SAT2ANT0(3);
-    yf(20) - q_SAT2ANT0(4);
 ];
 
 % Error
