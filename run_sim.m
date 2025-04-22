@@ -52,15 +52,16 @@ init_guess(1:6) = circ_orbit(1:6,1).'; % Initial spherical coords
 init_guess(7:12) = zeros(1,6); % Assume zero initial rotation
 
 % Initial quaternions
-q_LOS2SAT0 = [0,0,0,1]; % Zero rotation quat i.e. point at earth
-q_SAT2ANT0 = [0,0,0,1]; % Zero rot quat i.e. ant line with sat
+q_LOS2SAT0 = get_initial_quat(circ_orbit(1:3,1)); % Zero rotation quat i.e. point at earth
+R_31_SAT2ANT = R3(0)*R1(0);
+q_SAT2ANT0 = sheppard_method(R_31_SAT2ANT); % Zero rot quat i.e. ant line with sat
 init_guess(13:16) = q_LOS2SAT0; % Zero rotation quat i.e. point at earth
 init_guess(17:20) = q_SAT2ANT0; % Zero rot quat i.e. ant line with sat
 
 % Guess initial errors
 % get DCM LOS2ANT 
-DCM_LOS2SAT = quat2dcm(q_LOS2SAT);
-DCM_SAT2ANT = quat2dcm(q_SAT2ANT);
+DCM_LOS2SAT = quat2dcm(q_LOS2SAT0);
+DCM_SAT2ANT = quat2dcm(q_SAT2ANT0);
 DCM_LOS2ANT = DCM_LOS2SAT*DCM_SAT2ANT;
 e_phi0 = acos(DCM_LOS2ANT(1,1));
 e_theta0 = acos(DCM_LOS2ANT(3,3)); % <-- this stuff feels suspect 2 me!
