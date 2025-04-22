@@ -27,9 +27,14 @@ bcs_sphere = [
 ];
 
 bcs_w = [
+    % Satellite initial = final
     yi(7)-yf(7);
     yi(8)-yf(8);
     yi(9)-yf(9);
+    % Antenna initial = final
+    yi(10)-yf(10);
+    yi(11)-yf(11);
+    yi(12)-yf(12);
 ];
 
 % Lambda
@@ -41,11 +46,6 @@ bcs_lambda = [
     yf(36);
     yf(37);
     yf(38);
-    % Lambdas corresponding to extra states at final time
-    yf(49);
-    yf(50);
-    yf(51);
-    yf(52);
 ];
 
 % Initial quaternions
