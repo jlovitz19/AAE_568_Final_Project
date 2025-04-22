@@ -5,7 +5,7 @@ q_LOS2SAT0 = param.q_LOS2SAT0;
 q_SAT2ANT0 = param.q_SAT2ANT0;
 e_phi0 = param.e_phi0;
 e_theta0 = param.e_theta0;
-x_np_1 = param.x_np_1;
+x_np1_0 = param.x_np1_0;
 lambda0 = param.lambda0;
 
 % Position and velocity in spherical coordinates
@@ -26,14 +26,26 @@ bcs_sphere = [
     yf(6) - sphere0(6);
 ];
 
+bcs_w = [
+    yi(7)-yf(7);
+    yi(8)-yf(8);
+    yi(9)-yf(9);
+];
+
 % Lambda
 bcs_lambda = [
-    yf(33) - lambda0(7);
-    yf(34) - lambda0(8);
-    yf(35) - lambda0(9);
-    yf(36) - lambda0(10);
-    yf(37) - lambda0(11);
-    yf(38) - lambda0(12);
+    % Lambdas corresponding to angular velocities time
+    yf(33);
+    yf(34);
+    yf(35);
+    yf(36);
+    yf(37);
+    yf(38);
+    % Lambdas corresponding to extra states at final time
+    yf(49);
+    yf(50);
+    yf(51);
+    yf(52);
 ];
 
 % Initial quaternions
@@ -71,16 +83,16 @@ bcs_e = [
 % Extra states
 bcs_x_np1 = [
     % Initial
-    yi(23) - x_np_1(1);
-    yi(24) - x_np_1(2);
-    yi(25) - x_np_1(3);
-    yi(26) - x_np_1(4);
+    yi(23) - x_np1_0(1);
+    yi(24) - x_np1_0(2);
+    yi(25) - x_np1_0(3);
+    yi(26) - x_np1_0(4);
     % Final
-    yf(23) - x_np_1(1);
-    yf(24) - x_np_1(2);
-    yf(25) - x_np_1(3);
-    yf(26) - x_np_1(4);
+    yf(23) - x_np1_0(1);
+    yf(24) - x_np1_0(2);
+    yf(25) - x_np1_0(3);
+    yf(26) - x_np1_0(4);
 ];
 
-bcs = [bcs_sphere; bcs_lambda; bcs_quat; bcs_e; bcs_x_np1];
+bcs = [bcs_sphere; bcs_w; bcs_lambda; bcs_quat; bcs_e; bcs_x_np1];
 end
