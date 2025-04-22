@@ -66,8 +66,12 @@ e_phi0 = acos(DCM_LOS2ANT(1,1));
 e_theta0 = acos(DCM_LOS2ANT(3,3)); % <-- this stuff feels suspect 2 me!
 init_guess(21:22) = [e_phi0, e_theta0]; % Initial error guess
 
+% Guess initial extra states (x_n+1 AKA x_np1)
+x_np10 = [0,0,0,0];
+init_guess(23:26) = x_np10;
+
 % Lambdas
-init_guess(23:52) = zeros(1,30); % Guess initial lambdas zero
+init_guess(27:52) = zeros(1,30); % Guess initial lambdas zero
 
 % Generate initial solution
 solinit = bvpinit(t, init_guess);
@@ -79,6 +83,7 @@ param.q_LOS2SAT0 = q_LOS2SAT0; % quaternijawns
 param.q_SAT2ANT0 = q_SAT2ANT0;
 param.e_phi0 = e_phi0;       % errors
 param.e_theta0 = e_theta0;
+param.x_np10 = x_np10;       % extra states
 param.lambda0 = init_guess(23:52); % lambdas
 
 % Use bvp4c to solve the boundary value problem
