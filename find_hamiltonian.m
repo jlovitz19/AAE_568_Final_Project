@@ -72,7 +72,8 @@ Me = 5.9722e24;  % Earth mass (kg)
 GM = G*(Me+61.6);   % Gravitational constant mu
 
 % get vel and acc
-v = [drho; rho*dphi; rho*dtheta*sin(phi)];
+%v = [drho; rho*dphi; rho*dtheta*sin(phi)];
+v = [drho; dphi; dtheta];
 
 a_rho = -GM/rho^2;
 ddrho = a_rho + rho*dphi^2 + rho*dtheta^2*sin(phi)^2;
